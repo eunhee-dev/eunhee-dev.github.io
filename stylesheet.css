@@ -1,0 +1,317 @@
+/* latin-ext */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Lato Italic'), local('Lato-Italic'), url(https://fonts.gstatic.com/s/lato/v15/S6u8w4BMUTPHjxsAUi-qNiXg7eU0.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Lato Italic'), local('Lato-Italic'), url(https://fonts.gstatic.com/s/lato/v15/S6u8w4BMUTPHjxsAXC-qNiXg7Q.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Lato Bold Italic'), local('Lato-BoldItalic'), url(https://fonts.gstatic.com/s/lato/v15/S6u_w4BMUTPHjxsI5wq_FQftx9897sxZ.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Lato Bold Italic'), local('Lato-BoldItalic'), url(https://fonts.gstatic.com/s/lato/v15/S6u_w4BMUTPHjxsI5wq_Gwftx9897g.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'), local('Lato-Regular'), url(https://fonts.gstatic.com/s/lato/v15/S6uyw4BMUTPHjxAwXiWtFCfQ7A.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'), local('Lato-Regular'), url(https://fonts.gstatic.com/s/lato/v15/S6uyw4BMUTPHjx4wXiWtFCc.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Lato Bold'), local('Lato-Bold'), url(https://fonts.gstatic.com/s/lato/v15/S6u9w4BMUTPHh6UVSwaPGQ3q5d0N7w.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Lato Bold'), local('Lato-Bold'), url(https://fonts.gstatic.com/s/lato/v15/S6u9w4BMUTPHh6UVSwiPGQ3q5d0.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+a {
+  color: #1772d0;
+  text-decoration: none;
+}
+
+a:focus,
+a:hover {
+  color: #f09228;
+  text-decoration: none;
+}
+
+body,
+td,
+th,
+tr,
+p,
+a {
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+strong {
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+h2 {
+  margin: 0;
+  font-weight: normal;
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 22px;
+}
+
+.papertitle {
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.name {
+  padding-top: 20px;
+  margin: 0;
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 32px;
+}
+
+.one {
+  width: 160px;
+  height: 160px;
+  position: relative;
+}
+
+.two {
+  width: 160px;
+  height: 160px;
+  position: absolute;
+  transition: opacity .2s ease-in-out;
+  -moz-transition: opacity .2s ease-in-out;
+  -webkit-transition: opacity .2s ease-in-out;
+}
+
+.fade {
+  transition: opacity .2s ease-in-out;
+  -moz-transition: opacity .2s ease-in-out;
+  -webkit-transition: opacity .2s ease-in-out;
+}
+
+span.highlight {
+  background-color: #ffffd0;
+}
+
+.colored-box {
+    color: black;
+    padding: 20px;
+    display: inline-block;
+    border-radius: 10px;
+}
+
+.page-shell {
+  width: 100%;
+  max-width: 800px;
+  border: 0;
+  border-spacing: 0;
+  border-collapse: separate;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.section-table {
+  width: 100%;
+  border: 0;
+  border-spacing: 0;
+  border-collapse: separate;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.intro-copy {
+  padding: 2.5%;
+  width: 63%;
+  vertical-align: middle;
+}
+
+.intro-badge-cell {
+  padding: 2.5%;
+  width: 37%;
+  max-width: 37%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.center {
+  text-align: center;
+}
+
+.profile-photo {
+  display: block;
+  width: 260px;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.section-heading {
+  padding: 16px;
+  width: 100%;
+  vertical-align: middle;
+}
+
+.work-table {
+  border-spacing: 0 10px;
+}
+
+.work-label {
+  padding: 16px;
+  width: 20%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.work-content {
+  padding: 14px 18px;
+  width: 80%;
+  vertical-align: middle;
+  border-radius: 18px;
+  background: #fbfbf8;
+}
+
+.work-chip {
+  padding: 20px;
+  display: inline-block;
+  border-radius: 12px;
+  font-weight: 700;
+  min-width: 110px;
+}
+
+.work-label.accent-sun,
+.work-label.accent-mint,
+.work-label.accent-sand,
+.work-label.accent-slate {
+  background-color: transparent;
+}
+
+.work-label.accent-sun .work-chip {
+  background-color: #f4d9a4;
+}
+
+.work-label.accent-mint .work-chip {
+  background-color: #cfe1d6;
+}
+
+.work-label.accent-sand .work-chip {
+  background-color: #dccdb9;
+}
+
+.work-label.accent-slate .work-chip {
+  background-color: #d7dee6;
+}
+
+.accent-sun,
+.accent-sun.work-chip,
+.colored-box.accent-sun,
+.work-chip.accent-sun {
+  background-color: #f4d9a4;
+}
+
+.accent-mint,
+.accent-mint.work-chip,
+.colored-box.accent-mint,
+.work-chip.accent-mint {
+  background-color: #cfe1d6;
+}
+
+.accent-sand,
+.accent-sand.work-chip,
+.colored-box.accent-sand,
+.work-chip.accent-sand {
+  background-color: #dccdb9;
+}
+
+.accent-slate,
+.accent-slate.work-chip,
+.colored-box.accent-slate,
+.work-chip.accent-slate {
+  background-color: #d7dee6;
+}
+
+.plain-table td {
+  padding: 10px 16px;
+}
+
+.timeline-content {
+  border-bottom: 1px solid rgba(23, 50, 77, 0.08);
+}
+
+.inline-meta {
+  display: block;
+  margin-top: 4px;
+  color: #4c5f70;
+}
+
+.info-grid td {
+  padding: 8px 16px;
+  vertical-align: middle;
+}
+
+.info-label {
+  width: 24%;
+  text-align: center;
+}
+
+.info-value {
+  width: 76%;
+}
+
+@media (max-width: 700px) {
+  .intro-copy,
+  .intro-badge-cell,
+  .work-label,
+  .work-content,
+  .info-label,
+  .info-value {
+    display: block;
+    width: 100%;
+    max-width: none;
+  }
+
+  .work-label,
+  .info-label {
+    padding-bottom: 0;
+  }
+}
