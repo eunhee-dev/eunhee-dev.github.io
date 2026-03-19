@@ -208,8 +208,8 @@ span.highlight {
   padding: 14px 18px;
   width: 80%;
   vertical-align: middle;
-  border-radius: 18px;
-  background: #fbfbf8;
+  border-radius: 0;
+  background: transparent;
 }
 
 .markdown-bullets-list {
@@ -246,7 +246,7 @@ span.highlight {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: 0;
 }
 
 .work-label.accent-sun,
@@ -333,11 +333,17 @@ span.highlight {
 
 .info-label {
   width: 24%;
-  text-align: center;
+  text-align: left;
 }
 
 .info-value {
   width: 76%;
+}
+
+.info-label .colored-box {
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
 }
 
 .info-value .markdown-bullets-list {
