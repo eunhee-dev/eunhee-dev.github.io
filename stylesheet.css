@@ -79,6 +79,7 @@ td,
 th,
 tr,
 p,
+li,
 a {
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
   font-size: 14px;
@@ -211,6 +212,15 @@ span.highlight {
   background: #fbfbf8;
 }
 
+.markdown-bullets-list {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.markdown-bullets-list li + li {
+  margin-top: 6px;
+}
+
 .work-chip {
   padding: 20px;
   display: inline-block;
@@ -318,7 +328,7 @@ span.highlight {
 
 .info-grid td {
   padding: 8px 16px;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .info-label {
@@ -328,6 +338,10 @@ span.highlight {
 
 .info-value {
   width: 76%;
+}
+
+.info-value .markdown-bullets-list {
+  margin-top: 0;
 }
 
 @media (max-width: 700px) {
