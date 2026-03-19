@@ -228,6 +228,10 @@ span.highlight {
   margin: 0 auto;
 }
 
+.education-chip-logo {
+  max-height: 72px;
+}
+
 .work-chip-preview {
   display: block;
   width: 100%;
@@ -288,6 +292,18 @@ span.highlight {
 
 .plain-table td {
   padding: 10px 16px;
+}
+
+.education-table .work-label {
+  width: 22%;
+}
+
+.education-table .work-content {
+  width: 78%;
+}
+
+.education-content p {
+  margin-bottom: 0;
 }
 
 .timeline-content {
