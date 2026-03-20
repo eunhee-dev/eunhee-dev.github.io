@@ -197,6 +197,7 @@ h3 {
 
 .role-hero .hero-summary {
   max-width: none;
+  color: var(--text);
 }
 
 .chip-row {
@@ -229,6 +230,10 @@ h3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.showcase-page .showcase-grid {
+  margin-top: 32px;
 }
 
 .showcase-card,
