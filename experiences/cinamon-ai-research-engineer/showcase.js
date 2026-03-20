@@ -1,5 +1,67 @@
 (function() {
+  var heroSummaries = document.querySelectorAll('.hero-summary');
   var carousels = document.querySelectorAll('[data-media-carousel]');
+
+  heroSummaries.forEach(function(summary) {
+    var lines = summary.textContent.split(/\r?\n/);
+    var hasMarkdownList = lines.some(function(line) {
+      return /^[-*+]\s+/.test(line.trim());
+    });
+    var replacement;
+    var paragraphLines = [];
+    var currentList = null;
+
+    function flushParagraph() {
+      var paragraph;
+
+      if (!paragraphLines.length) {
+        return;
+      }
+
+      paragraph = document.createElement('p');
+      paragraph.textContent = paragraphLines.join(' ');
+      replacement.appendChild(paragraph);
+      paragraphLines = [];
+    }
+
+    if (!hasMarkdownList) {
+      return;
+    }
+
+    replacement = document.createElement('div');
+    replacement.className = summary.className + ' hero-summary-rich';
+
+    lines.forEach(function(line) {
+      var trimmedLine = line.trim();
+      var listItem;
+
+      if (!trimmedLine) {
+        flushParagraph();
+        currentList = null;
+        return;
+      }
+
+      if (/^[-*+]\s+/.test(trimmedLine)) {
+        flushParagraph();
+
+        if (!currentList) {
+          currentList = document.createElement('ul');
+          replacement.appendChild(currentList);
+        }
+
+        listItem = document.createElement('li');
+        listItem.textContent = trimmedLine.replace(/^[-*+]\s+/, '');
+        currentList.appendChild(listItem);
+        return;
+      }
+
+      currentList = null;
+      paragraphLines.push(trimmedLine);
+    });
+
+    flushParagraph();
+    summary.replaceWith(replacement);
+  });
 
   carousels.forEach(function(carousel) {
     var slides = Array.prototype.slice.call(
