@@ -71,12 +71,42 @@
       return accessibleDescription || defaultDescription;
     }
 
+    function syncSlideVideos(slide, isActive) {
+      var videos = slide.querySelectorAll('video');
+
+      videos.forEach(function(video) {
+        var playPromise;
+
+        video.autoplay = true;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.setAttribute('autoplay', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('loop', '');
+        video.setAttribute('playsinline', '');
+
+        if (isActive) {
+          playPromise = video.play();
+
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(function() {});
+          }
+
+          return;
+        }
+
+        video.pause();
+      });
+    }
+
     function render() {
       slides.forEach(function(slide, index) {
         var isActive = index === currentIndex;
 
         slide.hidden = !isActive;
         slide.classList.toggle('is-active', isActive);
+        syncSlideVideos(slide, isActive);
       });
 
       if (descriptionNode) {
