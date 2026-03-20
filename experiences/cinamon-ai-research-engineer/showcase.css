@@ -200,6 +200,14 @@ h3 {
   color: var(--text);
 }
 
+.case-study-page .hero-summary,
+.case-study-page .content-block p,
+.case-study-page .content-block li,
+.case-study-page .media-copy,
+.case-study-page .media-carousel-status {
+  color: var(--text);
+}
+
 .chip-row {
   display: none;
 }
