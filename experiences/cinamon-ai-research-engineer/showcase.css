@@ -195,22 +195,56 @@ h3 {
   margin-top: 16px;
 }
 
-.hero-summary-rich {
+.hero-summary-rich,
+.markdown-list-rich {
   display: grid;
   gap: 8px;
 }
 
 .hero-summary-rich p,
-.hero-summary-rich li {
+.hero-summary-rich li,
+.markdown-list-rich p,
+.markdown-list-rich li {
   margin: 0;
   color: inherit;
   font: inherit;
   line-height: inherit;
 }
 
-.hero-summary-rich ul {
+.hero-summary-rich ul,
+.hero-summary-rich ol,
+.markdown-list-rich ul,
+.markdown-list-rich ol {
   margin: 0;
   padding-left: 20px;
+}
+
+.hero-summary-rich li > ul,
+.hero-summary-rich li > ol,
+.markdown-list-rich li > ul,
+.markdown-list-rich li > ol {
+  margin-top: 8px;
+}
+
+.hero-summary-rich > ul > li + li,
+.hero-summary-rich > ol > li + li,
+.markdown-list-rich > ul > li + li,
+.markdown-list-rich > ol > li + li {
+  margin-top: 8px;
+}
+
+.hero-summary-rich li > ul > li + li,
+.hero-summary-rich li > ol > li + li,
+.markdown-list-rich li > ul > li + li,
+.markdown-list-rich li > ol > li + li {
+  margin-top: 6px;
+}
+
+.content-markdown-list {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .role-hero .hero-summary {
@@ -219,6 +253,7 @@ h3 {
 }
 
 .case-study-page .hero-summary,
+.case-study-page .content-markdown-list,
 .case-study-page .content-block p,
 .case-study-page .content-block li,
 .case-study-page .media-copy,
@@ -384,7 +419,18 @@ h3 {
   padding-left: 20px;
 }
 
-.content-block li + li {
+.content-block li > ul,
+.content-block li > ol {
+  margin-top: 8px;
+}
+
+.content-block > ul > li + li,
+.content-block > ol > li + li {
+  margin-top: 8px;
+}
+
+.content-block li > ul > li + li,
+.content-block li > ol > li + li {
   margin-top: 6px;
 }
 

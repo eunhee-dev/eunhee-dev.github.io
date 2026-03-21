@@ -1,15 +1,33 @@
 (function() {
-  var heroSummaries = document.querySelectorAll('.hero-summary');
+  var markdownListBlocks = document.querySelectorAll(
+    '.hero-summary, [data-markdown-list]'
+  );
   var carousels = document.querySelectorAll('[data-media-carousel]');
 
-  heroSummaries.forEach(function(summary) {
-    var lines = summary.textContent.split(/\r?\n/);
-    var hasMarkdownList = lines.some(function(line) {
-      return /^[-*+]\s+/.test(line.trim());
-    });
+  markdownListBlocks.forEach(function(block) {
+    var lines = block.textContent.split(/\r?\n/);
+    var bulletLines = lines
+      .map(function(line) {
+        var match = line.match(/^(\s*)[-*+]\s+(.*)$/);
+
+        if (!match) {
+          return null;
+        }
+
+        return {
+          indent: match[1].replace(/\t/g, '  ').length
+        };
+      })
+      .filter(Boolean);
+    var hasMarkdownList = bulletLines.length > 0;
+    var baseIndent = hasMarkdownList
+      ? bulletLines.reduce(function(minIndent, bulletLine) {
+          return Math.min(minIndent, bulletLine.indent);
+        }, bulletLines[0].indent)
+      : 0;
     var replacement;
     var paragraphLines = [];
-    var currentList = null;
+    var listStack = [];
 
     function flushParagraph() {
       var paragraph;
@@ -24,43 +42,111 @@
       paragraphLines = [];
     }
 
+    function resetListState() {
+      listStack = [];
+    }
+
+    function appendList(parent) {
+      var list = document.createElement('ul');
+
+      parent.appendChild(list);
+      return list;
+    }
+
+    function getListEntry(relativeIndent) {
+      var currentEntry;
+      var nestedList;
+
+      if (!listStack.length) {
+        currentEntry = {
+          indent: relativeIndent,
+          list: appendList(replacement),
+          lastItem: null
+        };
+        listStack.push(currentEntry);
+        return currentEntry;
+      }
+
+      currentEntry = listStack[listStack.length - 1];
+
+      if (relativeIndent > currentEntry.indent) {
+        if (!currentEntry.lastItem) {
+          return currentEntry;
+        }
+
+        nestedList = appendList(currentEntry.lastItem);
+        currentEntry = {
+          indent: relativeIndent,
+          list: nestedList,
+          lastItem: null
+        };
+        listStack.push(currentEntry);
+        return currentEntry;
+      }
+
+      while (listStack.length > 1 && relativeIndent < currentEntry.indent) {
+        listStack.pop();
+        currentEntry = listStack[listStack.length - 1];
+      }
+
+      if (relativeIndent < currentEntry.indent) {
+        currentEntry = {
+          indent: relativeIndent,
+          list: appendList(replacement),
+          lastItem: null
+        };
+        listStack = [currentEntry];
+      }
+
+      return currentEntry;
+    }
+
     if (!hasMarkdownList) {
       return;
     }
 
     replacement = document.createElement('div');
-    replacement.className = summary.className + ' hero-summary-rich';
+    replacement.className = (block.className ? block.className + ' ' : '') +
+      'markdown-list-rich';
+
+    if (block.classList.contains('hero-summary')) {
+      replacement.classList.add('hero-summary-rich');
+    }
 
     lines.forEach(function(line) {
+      var lineMatch = line.match(/^(\s*)[-*+]\s+(.*)$/);
       var trimmedLine = line.trim();
+      var listEntry;
       var listItem;
+      var relativeIndent;
 
       if (!trimmedLine) {
         flushParagraph();
-        currentList = null;
+        resetListState();
         return;
       }
 
-      if (/^[-*+]\s+/.test(trimmedLine)) {
+      if (lineMatch) {
         flushParagraph();
-
-        if (!currentList) {
-          currentList = document.createElement('ul');
-          replacement.appendChild(currentList);
-        }
+        relativeIndent = Math.max(
+          0,
+          lineMatch[1].replace(/\t/g, '  ').length - baseIndent
+        );
+        listEntry = getListEntry(relativeIndent);
 
         listItem = document.createElement('li');
-        listItem.textContent = trimmedLine.replace(/^[-*+]\s+/, '');
-        currentList.appendChild(listItem);
+        listItem.textContent = lineMatch[2].trim();
+        listEntry.list.appendChild(listItem);
+        listEntry.lastItem = listItem;
         return;
       }
 
-      currentList = null;
+      resetListState();
       paragraphLines.push(trimmedLine);
     });
 
     flushParagraph();
-    summary.replaceWith(replacement);
+    block.replaceWith(replacement);
   });
 
   carousels.forEach(function(carousel) {
