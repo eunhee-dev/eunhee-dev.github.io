@@ -27,11 +27,11 @@
         <h1>🔠 Text-to-Motion</h1>
         <p class="hero-meta">프로젝트 기간: 2025. 12 - 2026. 03</p>
         <p class="hero-summary">
-          사용자의 🔤 텍스트 입력을 받아 🕺 원하는 길이의 모션 시퀀스를 생성합니다.
-
+          사용자의 텍스트 입력을 받아 원하는 길이의 모션 시퀀스를 생성합니다.
           - Motion diffusion model을 classificer-free guidance 방식으로 학습해 text condition을 반영했습니다.
           - Rule-based mirror augmentation을 적용해 motion-text paired 데이터의 양을 2배, text annotation을 30% 증가시켜 학습에 활용했습니다. 
           - NVIDIA Triton로 추론 과정을 최적화해 기존 대비 10배 빠른 추론 속도를 달성했고, FastAPI로 배포해 확장성과 사용 편의성을 높였습니다. 
+          - 데이터 파이프라인 점검, 모델 학습, 추론 최적화, 배포에 이르는 전체 파이프라인을 담당했습니다. 
         </p>
         <div class="chip-row" aria-label="Text-to-Motion metadata">
           <span class="chip">Placeholder</span>
@@ -76,28 +76,52 @@
         </div>
 
         <div class="content-block">
-          <h2>Overview</h2>
-          <p>
-            Use this section for a short project summary. It should explain what the work was, why it mattered,
-            and what kind of experience or system it supported.
+          <h2>📍 풀어야 했던 문제</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - As-is : 유사도 기반 검색 모델 활용
+              - 장점
+                - 우수한 품질의 모션 데이터 제공 가능 (폴리싱이 끝난 모캡 데이터 원본)
+                - 경량화된 모델로 빠른 서비스 제공 가능
+              - 단점
+                - 확보한 데이터셋으로 한정되는 표현 범위
+                - 사용자가 원하는 길이를 지정해 제공 불가 (어노테이션 된 구간 그대로 제공 가능)
+            - To-be : 생성 모델 이용
+              - 생성 가능한 범위와 표현력 상승 필요
+              - 임의 길이 생성 기능 제공
+              - 샘플링 로직 및 모델 최적화를 통한 빠른 추론 필요
           </p>
         </div>
 
         <div class="content-block">
-          <h2>What This Placeholder Represents</h2>
-          <p>
-            Replace this paragraph with the problem framing, the intended user or product context, and the
-            reason this case study deserves a dedicated portfolio page.
+          <h2>📍 업무 수행 내용</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - Denoising network로 Transformer Encoder 아키텍쳐 사용, 가변 길이에 유연하게 대응 가능
+            - Motion diffusion model의 기존 DDPM 1000 step sampling을 적용할 경우, 300 frame 생성 기준 1분 이상 소요 (FBX I/O 제외)
+              - DDIM 10 step으로 변경, 샘플링 효율성 증가
+            - 생성 결과물의 아티팩트를 보정할 수 있는 motion refinement model 후처리 적용
+            - 정합성이 검증된 충분한 모션-텍스트 데이터 쌍 확보
+              - 어노테이터가 작업한 모션-텍스트 데이터의 좌/우 반전 적용, 데이터 수량 증가
+              - 이때, left ↔ right, clockwise ↔ anticlockwise 등 방향성이 어노테이션된 경우, 대응되는 반대 쌍으로 어노테이션 수정해 좌/우 반전에 대응
+            - Triton + FastAPI 를 이용한 추론 최적화 및 효율적인 서빙 구조 채택
+              - FastAPI : 데이터 I/O 담당 (서비스에 필요한 변환로직 수행)
+              - Triton : 최적화된 추론 로직 담당
+                - Dynamic batching 적용, 추론 요청을 자동으로 배치로 구성해 GPU 자원 활용 최적화
+                - Ensemble model 적용, 단일 Triton 추론 서버에서 모델을 캡슐화해서 단일 네트워크 호출로 실행 가능
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Potential Contributions</h2>
-          <ul>
-            <li>Add a concise problem statement and the scope of the work.</li>
-            <li>Summarize the approach, including model, tooling, pipeline, or system decisions.</li>
-            <li>Swap the placeholder media with a final demo clip, walkthrough, or embedded media.</li>
-          </ul>
+          <h2>📍 기여한 점</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 사용자의 모션 생성 자유도 상승 기여
+              - 검색모델 대비 표현 가능한 모션 범위 증가
+              - 생성 다양성을 유지하며 좌/우, 시계/반시계 등 방향성 있는 텍스트에 정합성을 높인 모션 생성 가능
+              - 원하는 길이를 지정한 모션 생성 가능
+            - 데이터, 모델 학습, 최적화, 배포 전체 파이프라인 담당
+              - ML Lifecycle 전체 매니지먼트, 문서화를 통한 조직 내 경험 공유
+              - 모델 성능의 병목이 되는 지점을 작은 단위로 나누어 진단 및 개선
+              - 엔지니어링, 클라이언트 등 타 팀과의 커뮤니케이션을 통한 문제 해결
+          </p>
         </div>
       </div>
     </div>
