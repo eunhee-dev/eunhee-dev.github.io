@@ -25,18 +25,16 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · In-betweening</p>
         <h1>🎥 In-betweening</h1>
-        <p class="hero-meta">Connect two motion segments with natural transitions</p>
+        <p class="hero-meta">임의의 두 모션 사이를 자연스럽게 이어주는 전이 구간을 생성합니다.</p>
         <p class="hero-summary">
-          Example summary:
-
-          - State which motion segments are being connected and what continuity problem is being solved.
-          - Explain how the method maintains timing, plausibility, and visual smoothness.
-          - Use the media below to show the transition result and an additional sample case.
+          - 시작 모션과 끝 모션 사이의 비어 있는 구간을 자연스러운 움직임으로 채웁니다.
+          - 타이밍, 자세 연속성, 시각적 매끄러움을 동시에 맞추는 것이 핵심입니다.
+          - 아래 미디어에서 transition 결과와 샘플 케이스를 함께 확인할 수 있습니다.
         </p>
         <div class="chip-row" aria-label="In-betweening metadata">
-          <span class="chip">Placeholder</span>
-          <span class="chip">Detail Page</span>
-          <span class="chip">Media Slot</span>
+          <span class="chip">Transition Generation</span>
+          <span class="chip">Motion Editing</span>
+          <span class="chip">Sequence Continuity</span>
         </div>
       </div>
 
@@ -49,7 +47,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="The first slot shows the core in-betweening result clip."
+                data-media-description="두 모션 구간 사이를 자연스럽게 연결한 핵심 결과를 보여줍니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening result demo video">
                   <source src="/assets/video/motion-in-betweening.mp4" type="video/mp4">
@@ -59,7 +57,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="The second slot shows the dno p2p sample clip for the in-betweening workflow."
+                data-media-description="다른 입력 구간 조합에서도 자연스럽게 이어지는 transition 샘플을 보여줍니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening dno p2p sample demo video">
@@ -73,34 +71,43 @@
               <span data-media-current>1</span> / <span data-media-total>2</span>
             </div>
           </div>
-          <p class="placeholder-note">
-            The first slot shows the core in-betweening result clip.
+          <p class="placeholder-note" data-media-description-target aria-live="polite">
+            두 모션 구간 사이를 자연스럽게 연결한 핵심 결과를 보여줍니다.
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Overview</h2>
-          <p>
-            Use this opening block to orient the reader quickly. It should answer what the project is and why
-            this page exists without trying to tell the whole story at once.
+          <h2>📍 풀어야 했던 문제</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - As-is : 임의의 두 모션을 바로 이어 붙이면 자세와 속도가 맞지 않아 부자연스러움
+              - 컷 편집이나 인터랙션 전환 시 움직임의 끊김이 눈에 띔
+              - 수작업으로 연결 구간을 보정하려면 많은 시간이 필요함
+            - To-be : 전이 구간을 자동으로 생성
+              - 시작/끝 문맥을 반영한 자연스러운 연결이 필요
+              - 길이와 타이밍을 제어할 수 있어야 함
           </p>
         </div>
 
         <div class="content-block">
-          <h2>What This Placeholder Represents</h2>
-          <p>
-            Replace this paragraph with the core framing: what needed to happen, what role you played, and what
-            made the execution notable enough to showcase publicly.
+          <h2>📍 업무 수행 내용</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 입력 모션 구간과 목표 연결 조건을 정의
+            - 중간 구간 생성 시 자세 연속성과 움직임 흐름을 유지하는 방향을 정리
+            - 다양한 샘플 케이스로 transition 품질을 확인할 수 있도록 결과를 구성
+            - 데모 환경에서 결과를 직관적으로 확인할 수 있도록 미디어를 정리
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Potential Contributions</h2>
-          <ul>
-            <li>State the problem and the surrounding system or workflow context.</li>
-            <li>Summarize the implementation path in a compact, portfolio-friendly way.</li>
-            <li>Use the media section to show the final output, behavior, or interaction clearly.</li>
-          </ul>
+          <h2>📍 기여한 점</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 모션 편집과 인터랙션 구성에서 필요한 전환 구간 제작 비용을 줄이는 방향을 제시
+              - 다양한 클립을 더 유연하게 재사용할 수 있는 기반 확보
+              - 끊김 없는 결과를 통해 사용자 경험 완성도 향상에 기여
+            - 시각적으로 설명 가능한 샘플을 정리해 협업과 검토 효율을 높임
+              - 결과 품질을 빠르게 판단하고 비교할 수 있음
+              - 후속 기능 확장 시 참고할 수 있는 케이스 스터디 역할 수행
+          </p>
         </div>
       </div>
     </div>

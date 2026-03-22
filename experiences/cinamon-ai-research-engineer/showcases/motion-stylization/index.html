@@ -25,18 +25,16 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Motion Stylization</p>
         <h1>🎨 Motion Stylization</h1>
-        <p class="hero-meta">Apply target styles without losing motion content</p>
+        <p class="hero-meta">동작 의미를 유지한 채 원하는 스타일로 변환합니다.</p>
         <p class="hero-summary">
-          Example summary:
-
-          - Define the source motion, the target style, and the transformation goal.
-          - Summarize the control method or model setup used to keep content while changing style.
-          - Use the media below to show the stylized result and a supporting example clip.
+          - 동일한 모션 콘텐츠를 유지하면서 특정 캐릭터성이나 분위기를 반영한 결과를 생성합니다.
+          - 원본 동작 의미를 보존하면서 스타일 강도를 조절하는 것이 핵심입니다.
+          - 아래 미디어에서 stylized 결과와 비교용 예시를 함께 볼 수 있습니다.
         </p>
         <div class="chip-row" aria-label="Motion Stylization metadata">
-          <span class="chip">Placeholder</span>
-          <span class="chip">Detail Page</span>
-          <span class="chip">Media Slot</span>
+          <span class="chip">Style Transfer</span>
+          <span class="chip">Content Preservation</span>
+          <span class="chip">Character Motion</span>
         </div>
       </div>
 
@@ -49,7 +47,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="The first slot shows the dance-to-zombie motion stylization result."
+                data-media-description="동일한 동작을 다른 스타일로 변환한 결과를 확인할 수 있습니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Stylization dance-to-zombie demo video">
                   <source src="/assets/video/motion-stylization-dance-to-zombie.mp4" type="video/mp4">
@@ -59,7 +57,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="The second slot shows the motion matching zombie dance example for the stylization workflow."
+                data-media-description="스타일 변환 워크플로우를 이해할 수 있는 보조 예시 영상을 제공합니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Stylization motion matching zombie dance example video">
@@ -73,34 +71,43 @@
               <span data-media-current>1</span> / <span data-media-total>2</span>
             </div>
           </div>
-          <p class="placeholder-note">
-            The first slot shows the dance-to-zombie motion stylization result.
+          <p class="placeholder-note" data-media-description-target aria-live="polite">
+            동일한 동작을 다른 스타일로 변환한 결과를 확인할 수 있습니다.
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Overview</h2>
-          <p>
-            Write a compact overview here that establishes what the project was and what kind of artifact or
-            experience the viewer is about to see.
+          <h2>📍 풀어야 했던 문제</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - As-is : 동일한 동작이라도 원하는 캐릭터성이나 분위기를 반영한 결과를 만들기 어려움
+              - 스타일만 바꾸고 동작 의미는 유지해야 함
+              - 강한 스타일 변화는 원본 콘텐츠 왜곡으로 이어질 수 있음
+            - To-be : 콘텐츠 보존형 스타일 변환
+              - source motion의 의미를 유지해야 함
+              - target style을 명확하게 반영해야 함
           </p>
         </div>
 
         <div class="content-block">
-          <h2>What This Placeholder Represents</h2>
-          <p>
-            Replace this copy with a short explanation of the project goal, the main technical or product
-            tension, and the reason this case study should stand on its own.
+          <h2>📍 업무 수행 내용</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - source motion과 target style 간 변환 목표를 정의하고 샘플 구조를 정리
+            - motion content preservation과 style control 사이 균형을 맞추는 방향을 실험
+            - stylized result와 reference example을 함께 비교할 수 있도록 결과를 구성
+            - 시각적으로 결과 차이가 잘 드러나도록 showcase용 미디어를 정리
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Potential Contributions</h2>
-          <ul>
-            <li>Document the setting, key constraint, and intended user-facing outcome.</li>
-            <li>Summarize the approach with enough detail to sound credible but remain concise.</li>
-            <li>Pair the final explanation with a single clear media asset that reinforces the story.</li>
-          </ul>
+          <h2>📍 기여한 점</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 동일한 모션 자산을 다양한 톤앤매너로 확장할 수 있는 가능성을 제시
+              - 캐릭터, 세계관, 연출 요구에 맞는 variation 제작이 가능
+              - 재활용 가능한 모션 자산의 활용도를 높일 수 있음
+            - 결과 비교가 쉬운 형태로 정리해 품질 판단과 협업 커뮤니케이션에 기여
+              - 스타일 변화가 사용자에게 어떻게 보이는지 빠르게 검토 가능
+              - 데모 중심으로 연구 결과를 설명할 수 있는 기반을 마련
+          </p>
         </div>
       </div>
     </div>

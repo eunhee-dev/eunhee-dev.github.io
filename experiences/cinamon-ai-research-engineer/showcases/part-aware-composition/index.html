@@ -25,18 +25,16 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Part-aware Composition</p>
         <h1>🎭 Part-aware Composition</h1>
-        <p class="hero-meta">Compose new motions from independent body parts</p>
+        <p class="hero-meta">신체 부위별 특성을 조합해 새로운 모션을 구성합니다.</p>
         <p class="hero-summary">
-          Example summary:
-
-          - Explain which body-part motions are combined and why this composition is useful.
-          - Summarize the composition logic, constraints, or model behavior that keeps the result coherent.
-          - Use the media below to show multiple recombined motion examples.
+          - 서로 다른 모션의 상체, 하체 또는 파트별 특징을 조합해 새로운 결과를 만듭니다.
+          - 파트 간 충돌이나 리듬 붕괴 없이 전체 모션을 자연스럽게 유지하는 것이 핵심입니다.
+          - 아래 미디어에서 서로 다른 조합 결과를 비교해 볼 수 있습니다.
         </p>
         <div class="chip-row" aria-label="Part-aware Composition metadata">
-          <span class="chip">Placeholder</span>
-          <span class="chip">Detail Page</span>
-          <span class="chip">Media Slot</span>
+          <span class="chip">Body-part Control</span>
+          <span class="chip">Motion Composition</span>
+          <span class="chip">Content Creation</span>
         </div>
       </div>
 
@@ -49,7 +47,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="The first slot shows the gun samples result for part-aware composition."
+                data-media-description="서로 다른 파트 조합으로 생성한 결과 샘플을 확인할 수 있습니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Part-aware Composition gun samples demo video">
                   <source src="/assets/video/part-aware-composition-gun-samples0001-0090.mp4" type="video/mp4">
@@ -59,7 +57,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="The second slot shows the jump-like-a-frog composition example."
+                data-media-description="특정 동작 콘셉트에 맞춰 파트별 조합이 적용된 예시를 보여줍니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Part-aware Composition jump-like-a-frog demo video">
@@ -73,34 +71,43 @@
               <span data-media-current>1</span> / <span data-media-total>2</span>
             </div>
           </div>
-          <p class="placeholder-note">
-            The first slot shows the gun samples result for part-aware composition.
+          <p class="placeholder-note" data-media-description-target aria-live="polite">
+            서로 다른 파트 조합으로 생성한 결과 샘플을 확인할 수 있습니다.
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Overview</h2>
-          <p>
-            Replace this with a compact summary that frames the project as a portfolio story, not a full
-            technical report. Aim for clarity and momentum over exhaustive detail.
+          <h2>📍 풀어야 했던 문제</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - As-is : 단일 모션 클립 단위로만 활용하면 원하는 동작 조합을 빠르게 만들기 어려움
+              - 상체와 하체처럼 파트별 의도를 따로 제어하기 어려움
+              - 단순 결합 시 파트 간 위화감이나 전체 리듬 붕괴가 발생함
+            - To-be : 파트 단위 조합으로 새로운 모션을 유연하게 생성
+              - 독립적인 파트 제어가 가능해야 함
+              - 전체 모션의 자연스러움과 일관성을 유지해야 함
           </p>
         </div>
 
         <div class="content-block">
-          <h2>What This Placeholder Represents</h2>
-          <p>
-            Use this space to explain the project objective, the kind of problem it addressed, and why the final
-            output or system behavior deserves a closer look.
+          <h2>📍 업무 수행 내용</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 파트별 motion representation을 나누고 recomposition 방식 설계
+            - 상체/하체 혹은 limb 단위 특징을 유지한 채 새로운 조합을 생성
+            - 경계 구간에서 발생하는 자세 불연속과 충돌을 줄이기 위한 보정 방향 검토
+            - 다양한 조합 결과를 빠르게 확인할 수 있도록 샘플 생성 및 데모 구성
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Potential Contributions</h2>
-          <ul>
-            <li>Summarize the project brief in one or two direct sentences.</li>
-            <li>Highlight the implementation, experimentation, or coordination work involved.</li>
-            <li>Pair the narrative with a short media asset that makes the outcome immediately legible.</li>
-          </ul>
+          <h2>📍 기여한 점</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 기존 모션 자산을 재조합해 새로운 variation을 만들 수 있는 기반을 마련
+              - 별도 신규 데이터 없이 표현 범위를 확장할 수 있음
+              - 세부 파트 제어를 통해 사용자 의도 반영 폭을 넓힘
+            - 콘텐츠 제작 관점에서 모션 자산의 재사용성과 효율을 높이는 방향을 제시
+              - 결과를 직관적으로 확인할 수 있는 샘플 구조를 정리
+              - 생성 결과 검토와 아이데이션 속도를 높이는 데 기여
+          </p>
         </div>
       </div>
     </div>

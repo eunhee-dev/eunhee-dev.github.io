@@ -25,18 +25,16 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Motion Refinement</p>
         <h1>🪄 Motion Refinement</h1>
-        <p class="hero-meta">Refine motion quality while preserving content</p>
+        <p class="hero-meta">모션의 콘텐츠를 유지하며 어색함을 자연스럽게 보정합니다.</p>
         <p class="hero-summary">
-          Example summary:
-
-          - Explain what kind of motion artifacts or quality issues this refinement step fixes.
-          - Note how the system preserves the original motion content while improving realism.
-          - Use the media below to show the result clip and a representative usage flow.
+          - 생성 또는 합성된 모션에서 남는 떨림, 미끄러짐, 불연속성을 후처리로 보정합니다.
+          - 원본 모션의 타이밍과 동작 의미를 유지하면서 결과의 자연스러움을 높이는 것이 핵심입니다.
+          - 아래 미디어에서 refinement 결과와 실제 사용 흐름을 함께 확인할 수 있습니다.
         </p>
         <div class="chip-row" aria-label="Motion Refinement metadata">
-          <span class="chip">Placeholder</span>
-          <span class="chip">Detail Page</span>
-          <span class="chip">Media Slot</span>
+          <span class="chip">Post-processing</span>
+          <span class="chip">Quality Enhancement</span>
+          <span class="chip">Motion Pipeline</span>
         </div>
       </div>
 
@@ -49,7 +47,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="The first slot shows the motion refinement result clip."
+                data-media-description="Refinement 적용 후 더 자연스러워진 모션 결과를 확인할 수 있습니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Refinement result demo video">
                   <source src="/assets/video/refinement-result.mp4" type="video/mp4">
@@ -59,7 +57,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="The second slot shows how the motion refinement feature is used in practice."
+                data-media-description="실제 워크플로우 안에서 motion refinement 기능이 연결되는 사용 예시를 보여줍니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Refinement usage demo video">
@@ -73,34 +71,43 @@
               <span data-media-current>1</span> / <span data-media-total>2</span>
             </div>
           </div>
-          <p class="placeholder-note">
-            The first slot shows the motion refinement result clip.
+          <p class="placeholder-note" data-media-description-target aria-live="polite">
+            Refinement 적용 후 더 자연스러워진 모션 결과를 확인할 수 있습니다.
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Overview</h2>
-          <p>
-            Start this section with a short, direct description of the project. Keep it specific enough to feel
-            concrete, but brief enough to stay readable in a portfolio format.
+          <h2>📍 풀어야 했던 문제</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - As-is : 생성 또는 합성된 모션 결과에 작은 떨림, 발 미끄러짐, 관절 충돌 같은 아티팩트가 남을 수 있음
+              - 결과물의 완성도를 떨어뜨리고 후속 수작업 보정 비용을 증가시킴
+              - 모션의 의미와 타이밍은 유지한 채 품질만 개선해야 함
+            - To-be : 후처리 단계에서 자연스러움을 안정적으로 향상
+              - 입력 길이와 동작 유형이 달라도 일관되게 보정 가능해야 함
+              - 기존 생성 파이프라인에 쉽게 연결 가능한 refinement 단계가 필요
           </p>
         </div>
 
         <div class="content-block">
-          <h2>What This Placeholder Represents</h2>
-          <p>
-            Use this block to describe the challenge, what needed to change, and why the final solution is worth
-            highlighting in a standalone page.
+          <h2>📍 업무 수행 내용</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 대표적인 artifact 유형을 분류하고 전후 비교 기준을 정의
+            - 원본 motion content를 유지하면서 불연속성을 줄이는 refinement 로직을 적용
+            - 입력 모션의 흐름과 타이밍이 깨지지 않도록 보정 기준을 설계
+            - 결과를 서비스 파이프라인에 연결해 생성 직후 후처리가 가능하도록 구성
           </p>
         </div>
 
         <div class="content-block">
-          <h2>Potential Contributions</h2>
-          <ul>
-            <li>Introduce the project with one clear sentence about context and objective.</li>
-            <li>Explain the workflow, experiments, or implementation decisions at a high level.</li>
-            <li>Add a short result statement that the media can support visually.</li>
-          </ul>
+          <h2>📍 기여한 점</h2>
+          <p class="content-markdown-list" data-markdown-list>
+            - 별도 수작업 없이도 생성 결과물의 완성도를 높일 수 있는 품질 보정 레이어를 마련
+              - 서비스 품질에 직접 연결되는 후처리 단계로 활용 가능
+              - 다른 생성/합성 기능에도 재사용 가능한 구조를 확보
+            - 연구 결과를 실제 사용자 경험 개선으로 이어지게 만드는 마무리 단계를 담당
+              - 모션 품질 이슈를 시각적으로 설명하고 협업할 수 있는 기준을 정리
+              - 결과 검토와 개선 사이클을 더 빠르게 돌릴 수 있게 기여
+          </p>
         </div>
       </div>
     </div>
