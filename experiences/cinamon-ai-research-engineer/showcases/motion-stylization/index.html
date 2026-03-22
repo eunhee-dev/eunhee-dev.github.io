@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260320-text-to-motion-teaser-gif">
+    <link rel="stylesheet" href="../../showcase.css?v=20260322-markdown-code-blocks">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -25,16 +25,18 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Motion Stylization</p>
         <h1>🎨 Motion Stylization</h1>
-        <p class="hero-meta">동작 의미를 유지한 채 원하는 스타일로 변환합니다.</p>
+        <p class="hero-meta">프로젝트 기간: 2024. 08 - 2025. 02</p>
         <p class="hero-summary">
-          - 동일한 모션 콘텐츠를 유지하면서 특정 캐릭터성이나 분위기를 반영한 결과를 생성합니다.
-          - 원본 동작 의미를 보존하면서 스타일 강도를 조절하는 것이 핵심입니다.
-          - 아래 미디어에서 stylized 결과와 비교용 예시를 함께 볼 수 있습니다.
+          모션의 content는 유지한 채 원하는 style만 반영하는 스타일라이제이션 모델과 내부 활용 도구를 개발했습니다.
+          - 공개 baseline을 직접 비교해 action mismatch에서 발생하는 twist, sequence instability failure case를 정리했습니다.
+          - 시나몬 데이터에 맞춘 자체 style model을 설계하고, VAE 안정화, style penalty, learnable token, stratified training으로 학습 파이프라인을 구축했습니다.
+          - mixed attention DDIM, forward alignment, front direction / length alignment 보정으로 샘플링 품질과 재현성을 개선했습니다.
+          - 여러 후보 생성, FBX viewer, feedback, export가 가능한 내부 툴까지 연결해 연구 결과를 팀 자산으로 전환했습니다.
         </p>
         <div class="chip-row" aria-label="Motion Stylization metadata">
-          <span class="chip">Style Transfer</span>
-          <span class="chip">Content Preservation</span>
-          <span class="chip">Character Motion</span>
+          <span class="chip">Style Model</span>
+          <span class="chip">Sampling Control</span>
+          <span class="chip">Internal Tool</span>
         </div>
       </div>
 
@@ -79,38 +81,50 @@
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : 동일한 동작이라도 원하는 캐릭터성이나 분위기를 반영한 결과를 만들기 어려움
-              - 스타일만 바꾸고 동작 의미는 유지해야 함
-              - 강한 스타일 변화는 원본 콘텐츠 왜곡으로 이어질 수 있음
-            - To-be : 콘텐츠 보존형 스타일 변환
-              - source motion의 의미를 유지해야 함
-              - target style을 명확하게 반영해야 함
+            - As-is : 공개 스타일라이제이션 모델만으로는 시나몬 데이터 표현과 리그 맥락을 안정적으로 반영하기 어려움
+              - content와 style action이 멀어질수록 body twist, sequence collapse, drift가 쉽게 발생
+              - style effect가 약하면 결과가 밋밋하고, 반대로 강하면 원본 동작 의미가 무너짐
+              - 연구 코드 수준에 머물면 내부 데이터 증강이나 실제 활용으로 연결되기 어려움
+            - To-be : 시나몬 데이터에 맞춘 콘텐츠 보존형 스타일 변환 경로 확보
+              - content fidelity, style strength, sequence stability를 함께 만족해야 함
+              - 내부 표현과 데이터 분포에 맞는 자체 학습 구조가 필요
+              - 반복 사용 가능한 샘플링 경로와 내부 활용 도구가 필요
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - source motion과 target style 간 변환 목표를 정의하고 샘플 구조를 정리
-            - motion content preservation과 style control 사이 균형을 맞추는 방향을 실험
-            - stylized result와 reference example을 함께 비교할 수 있도록 결과를 구성
-            - 시각적으로 결과 차이가 잘 드러나도록 showcase용 미디어를 정리
+            - `Unpaired Motion Style Transfer`, `MCM-LDM Style Transfer`, `MoST`, `Motion Puzzle`을 동일 비교축으로 실험
+              - 어떤 조건에서 style transfer가 성립하고 action mismatch에서 어떻게 무너지는지 failure case 정리
+            - 시나몬 데이터 전용 style model 개발
+              - `Conv1D` / `Transformer` 기반 VAE를 안정화해 base autoencoder 구축
+              - style penalty, learnable token, hyperparameter 조정, stratified training으로 style supervision 설계
+            - 샘플링 경로 고도화
+              - mixed attention DDIM, forward alignment, front direction 반영, content/style length alignment 보정
+              - sampling bugfix, caching, 데모/문서화를 통해 반복 가능한 생성 경로로 정리
+            - 내부 증강 툴 개발
+              - content motion + style label 기반 batch generation
+              - FBX viewer, feedback, export, cache, usage doc까지 포함한 내부 페이지 구성
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 동일한 모션 자산을 다양한 톤앤매너로 확장할 수 있는 가능성을 제시
-              - 캐릭터, 세계관, 연출 요구에 맞는 variation 제작이 가능
-              - 재활용 가능한 모션 자산의 활용도를 높일 수 있음
-            - 결과 비교가 쉬운 형태로 정리해 품질 판단과 협업 커뮤니케이션에 기여
-              - 스타일 변화가 사용자에게 어떻게 보이는지 빠르게 검토 가능
-              - 데모 중심으로 연구 결과를 설명할 수 있는 기반을 마련
+            - 범용 baseline 탐색부터 자체 모델, 샘플링 제어, 내부 툴화까지 이어지는 전체 경로를 구축
+              - 스타일라이제이션을 실험 데모가 아니라 내부 자산 증강 수단으로 전환
+              - 후속 diffusion/attention 고도화와 조직 내 활용 방향을 동시에 열어 둠
+            - failure taxonomy를 먼저 만들고 개선축을 분명히 정리
+              - content preservation, style strength, sequence stability라는 평가 축을 정착
+              - 이후 실험이 막연한 모델 교체가 아니라 구조적 개선으로 이어지게 기여
+            - 비연구자도 결과를 확인하고 선택할 수 있는 사용 경로 마련
+              - 여러 후보를 빠르게 비교하고 FBX로 검토 가능한 흐름 제공
+              - 실제 운영 friction을 조기에 드러내 후속 개선 포인트를 확보
           </p>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260320-media-carousel"></script>
+    <script src="../../showcase.js?v=20260322-markdown-code-blocks"></script>
   </body>
 </html>

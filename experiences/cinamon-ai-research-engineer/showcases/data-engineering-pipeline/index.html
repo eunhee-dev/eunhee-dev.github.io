@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260320-text-to-motion-teaser-gif">
+    <link rel="stylesheet" href="../../showcase.css?v=20260322-markdown-code-blocks">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -25,16 +25,18 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Data Engineering Pipeline</p>
         <h1>🛠️ Data Engineering Pipeline</h1>
-        <p class="hero-meta">학습용 데이터 전처리 파이프라인을 구축하고 자동화합니다.</p>
+        <p class="hero-meta">프로젝트 기간: 2025. 05 - 2026. 01</p>
         <p class="hero-summary">
-          - 원천 데이터를 학습 가능한 포맷으로 변환하는 전체 전처리 흐름을 구성했습니다.
-          - 반복 작업을 자동화하고 검수 포인트를 정리해 데이터 품질과 처리 효율을 높였습니다.
-          - 아래 미디어에서 파이프라인 구조와 운영 흐름을 확인할 수 있습니다.
+          학습과 서비스에 쓰이는 모션 데이터를 신뢰 가능한 상태로 만들기 위해 전처리, metadata, canonicalize, 검수 경로를 단계적으로 리팩토링했습니다.
+          - root floating / sinking 이슈를 단순 필터링 문제가 아니라 representation 문제로 추적해, `convert_to_motion` 내 quaternion normalization을 실제 해결책으로 정리했습니다.
+          - Airflow preprocessing refactor, valid-area filtering bug fix, metadata 기준 일원화로 downstream이 실제 정제 결과를 반영하도록 수정했습니다.
+          - support model / warning / body ratio / test 체계를 정리해 운영 파이프라인의 예측 가능성을 높였습니다.
+          - orientation canonicalize, pelvis-based canonicalize, prop bone, gender retarget, BABEL preprocessing까지 묶어 데이터-모델 호환성 기반을 만들었습니다.
         </p>
         <div class="chip-row" aria-label="Data Engineering Pipeline metadata">
-          <span class="chip">Data Pipeline</span>
-          <span class="chip">Preprocessing Automation</span>
-          <span class="chip">Training Infrastructure</span>
+          <span class="chip">Airflow</span>
+          <span class="chip">Metadata Integrity</span>
+          <span class="chip">Canonicalization</span>
         </div>
       </div>
 
@@ -47,7 +49,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="학습용 데이터가 처리되는 전체 파이프라인 구조를 한눈에 보여줍니다."
+                data-media-description="전처리, filtering, metadata, canonicalize가 연결된 운영 파이프라인 구조를 한눈에 보여줍니다."
               >
                 <img src="/assets/images/data-engineering-pipeline.png" alt="Data engineering pipeline overview image">
               </div>
@@ -58,45 +60,57 @@
             </div>
           </div>
           <p class="placeholder-note" data-media-description-target aria-live="polite">
-            학습용 데이터가 처리되는 전체 파이프라인 구조를 한눈에 보여줍니다.
+            전처리, filtering, metadata, canonicalize가 연결된 운영 파이프라인 구조를 한눈에 보여줍니다.
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : 원천 데이터 포맷이 제각각이라 학습 전 반복 전처리와 수동 검수가 필요
-              - 데이터 정합성 오류가 늦게 발견되면 학습 비용이 커짐
-              - 사람 의존적인 프로세스라 재현성과 처리 속도가 떨어짐
-            - To-be : 학습용 데이터 파이프라인 자동화
-              - 표준화된 포맷 변환이 필요
-              - 검수 포인트와 실패 지점을 추적할 수 있어야 함
+            - As-is : filtering 결과와 metadata 기준이 어긋나면 downstream이 잘못된 데이터를 그대로 사용할 수 있음
+              - warning 정책, body ratio, duplicate frame, keyframe, interpolation 이슈가 반복적으로 운영 friction을 만듦
+              - quality issue가 dirty data인지, 전처리인지, representation mismatch인지 분리되지 않으면 잘못된 가설로 시간을 쓰게 됨
+            - To-be : 학습과 서빙이 같은 기준을 공유하는 신뢰 가능한 데이터 파이프라인
+              - Airflow 전처리, metadata, filtering, canonicalize가 일관되게 연결되어야 함
+              - outlier 검수와 representation validation이 함께 돌아야 함
+              - skeleton / body type / prop bone / gender retarget 차이까지 운영 가능한 기준으로 관리해야 함
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - raw data ingest부터 training-ready asset 생성까지 단계별 파이프라인을 구성
-            - 전처리, 검증, 산출물 관리 로직을 반복 실행 가능한 구조로 자동화
-            - 운영 관점에서 필요한 logging과 check point를 정리
-            - 전체 흐름을 빠르게 이해할 수 있도록 파이프라인 다이어그램을 구성
+            - 배포 품질 이슈 원인 분석
+              - 신규 바디 데이터에 outlier 필터를 정의하고 `202 / 9016 (2.24%)`, `186 / 9016 (2.06%)` 수준으로 수치화
+              - root floating의 최종 원인을 intermittent non-unit quaternion으로 특정하고 quaternion normalization 적용
+            - 운영성 리팩토링
+              - support model, warning, body ratio check, deterministic seed, legacy code cleanup, ONNX/MCP 설명 문서 정리
+              - duplicate frame, parsing util, P2P ONNX 구조, CI config, motion browser / warning 정책 개선
+            - Airflow / metadata 리팩토링
+              - filtering 단계를 전처리 흐름에서 명시적으로 분리
+              - valid-area filtering bug fix, Airflow DAG 재구성, metadata 기준 통합
+            - canonicalize / 호환성 정비
+              - orientation canonicalize, pelvis-based canonicalize, prop bone 처리, gender retarget, foot-contact fix
+              - BABEL preprocessing으로 약 `29,000` valid sample 확보, 모델 등록 규격과 configurable API endpoint 정리
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 데이터 준비 시간을 줄이고 반복 작업을 자동화해 연구 개발 속도 향상에 기여
-              - 학습 입력 품질과 재현성을 높일 수 있음
-              - 동일한 기준으로 데이터를 관리할 수 있는 운영 기반 마련
-            - 데이터 엔지니어링 관점의 병목을 구조적으로 해결할 수 있는 흐름을 정리
-              - 팀 간 협업 시 파이프라인 이해도를 높일 수 있음
-              - 후속 모델 실험이 더 빠르게 이어질 수 있는 기반을 제공
+            - 데이터 파이프라인을 "보이는 자동화"가 아니라 실제로 신뢰 가능한 운영 체계로 정리
+              - filtering 결과가 downstream 품질에 반영되는 구조를 확보
+              - 데이터와 metadata가 서로 다른 진실을 말하는 상황을 줄임
+            - 품질 이슈를 데이터 / 전처리 / 표현 안정성으로 분리해 보는 분석 습관을 정착
+              - root floating 같은 문제를 근본 원인까지 추적하는 방식으로 대응
+              - 이후 품질 회귀와 representation mismatch를 더 체계적으로 다룰 수 있게 기여
+            - P2P, MCP, locomotion, T2M, MOAI가 함께 쓸 수 있는 공통 기준 마련
+              - canonicalize와 retargeting 기반이 생기며 모델 간 호환성이 높아짐
+              - 후속 실험과 서비스 연결 비용을 줄이는 운영 자산으로 기능
           </p>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260320-media-carousel"></script>
+    <script src="../../showcase.js?v=20260322-markdown-code-blocks"></script>
   </body>
 </html>

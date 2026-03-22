@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260320-text-to-motion-teaser-gif">
+    <link rel="stylesheet" href="../../showcase.css?v=20260322-markdown-code-blocks">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -25,16 +25,18 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Motion Refinement</p>
         <h1>🪄 Motion Refinement</h1>
-        <p class="hero-meta">모션의 콘텐츠를 유지하며 어색함을 자연스럽게 보정합니다.</p>
+        <p class="hero-meta">프로젝트 기간: 2025. 12 - 2026. 01</p>
         <p class="hero-summary">
-          - 생성 또는 합성된 모션에서 남는 떨림, 미끄러짐, 불연속성을 후처리로 보정합니다.
-          - 원본 모션의 타이밍과 동작 의미를 유지하면서 결과의 자연스러움을 높이는 것이 핵심입니다.
-          - 아래 미디어에서 refinement 결과와 실제 사용 흐름을 함께 확인할 수 있습니다.
+          생성 또는 합성 결과를 한 번 더 다듬어 foot skating과 sequence artifact를 줄이는 motion refinement 경로를 비교·통합했습니다.
+          - generate / retrieve / meta 비율을 `34:66 -> 50:50`으로 재조정하는 과정에서 refine를 단일 후처리가 아니라 전체 품질 밸런싱 문제로 다뤘습니다.
+          - `VQVAE`, `RQVAE`, diffusion token refiner와 naive compose + refine를 비교해 어떤 케이스에서 실제 개선이 일어나는지 정리했습니다.
+          - stance, length mismatch, gaussian noise fill, refine step, low-step refine를 조정해 artifact 보정 폭을 세밀하게 튜닝했습니다.
+          - refine는 자연스러움을 높이는 경우도 있지만, 예시에 따라 foot skating을 악화시킬 수 있다는 trade-off까지 함께 문서화했습니다.
         </p>
         <div class="chip-row" aria-label="Motion Refinement metadata">
-          <span class="chip">Post-processing</span>
-          <span class="chip">Quality Enhancement</span>
-          <span class="chip">Motion Pipeline</span>
+          <span class="chip">Refiner Comparison</span>
+          <span class="chip">Artifact Control</span>
+          <span class="chip">Service Tuning</span>
         </div>
       </div>
 
@@ -47,7 +49,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="Refinement 적용 후 더 자연스러워진 모션 결과를 확인할 수 있습니다."
+                data-media-description="refiner 적용 후 foot skating과 불연속성이 얼마나 줄어드는지 전후 비교로 확인할 수 있습니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Refinement result demo video">
                   <source src="/assets/video/refinement-result.mp4" type="video/mp4">
@@ -57,7 +59,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="실제 워크플로우 안에서 motion refinement 기능이 연결되는 사용 예시를 보여줍니다."
+                data-media-description="generate / retrieve / compose 이후 refinement가 어떤 방식으로 연결되는지 실제 사용 흐름을 보여줍니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Refinement usage demo video">
@@ -72,45 +74,51 @@
             </div>
           </div>
           <p class="placeholder-note" data-media-description-target aria-live="polite">
-            Refinement 적용 후 더 자연스러워진 모션 결과를 확인할 수 있습니다.
+            refiner 적용 후 foot skating과 불연속성이 얼마나 줄어드는지 전후 비교로 확인할 수 있습니다.
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : 생성 또는 합성된 모션 결과에 작은 떨림, 발 미끄러짐, 관절 충돌 같은 아티팩트가 남을 수 있음
-              - 결과물의 완성도를 떨어뜨리고 후속 수작업 보정 비용을 증가시킴
-              - 모션의 의미와 타이밍은 유지한 채 품질만 개선해야 함
-            - To-be : 후처리 단계에서 자연스러움을 안정적으로 향상
-              - 입력 길이와 동작 유형이 달라도 일관되게 보정 가능해야 함
-              - 기존 생성 파이프라인에 쉽게 연결 가능한 refinement 단계가 필요
+            - As-is : generate나 retrieval만으로는 foot skating, stance mismatch, length mismatch 같은 artifact가 남음
+              - 후처리를 무조건 붙인다고 항상 좋아지는 것이 아니라, prompt와 motion type에 따라 오히려 악화되는 경우도 존재
+              - 품질 저하 원인이 generate, retrieve, refine 중 어디에 있는지 분리하지 않으면 개선 방향이 불명확함
+            - To-be : 효과와 한계를 설명할 수 있는 refinement 경로 확보
+              - 원본 motion content를 최대한 유지하면서 artifact만 줄여야 함
+              - stance, length, noise, step 같은 세부 제어 지점을 서비스 설정으로 다룰 수 있어야 함
+              - refine를 end-to-end 파이프라인 안에서 선택 가능한 품질 튜닝 레이어로 정리해야 함
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 대표적인 artifact 유형을 분류하고 전후 비교 기준을 정의
-            - 원본 motion content를 유지하면서 불연속성을 줄이는 refinement 로직을 적용
-            - 입력 모션의 흐름과 타이밍이 깨지지 않도록 보정 기준을 설계
-            - 결과를 서비스 파이프라인에 연결해 생성 직후 후처리가 가능하도록 구성
+            - `VQVAE Motion Refine`, diffusion 기반 motion token refiner, naive compose + refine 경로를 비교
+              - foot skating, original motion preservation, naturalness 기준으로 전후 결과 검토
+            - T2M 밸런싱 프로젝트 안에서 refine를 별도 모듈이 아니라 generate / retrieve / meta 조합 문제로 재정의
+              - 목표 비율을 `34:66 -> 50:50`으로 조정하며 retrieval, prompt abstraction, final motion selection과 함께 다룸
+            - stance bugfix, length mismatch noise fill, gaussian noise fill, refine step tuning, low-step refine 실험 수행
+            - JSON endpoint, serving 경로, compose + refine 통합을 포함해 서비스 파이프라인에 연결 가능한 형태로 정리
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 별도 수작업 없이도 생성 결과물의 완성도를 높일 수 있는 품질 보정 레이어를 마련
-              - 서비스 품질에 직접 연결되는 후처리 단계로 활용 가능
-              - 다른 생성/합성 기능에도 재사용 가능한 구조를 확보
-            - 연구 결과를 실제 사용자 경험 개선으로 이어지게 만드는 마무리 단계를 담당
-              - 모션 품질 이슈를 시각적으로 설명하고 협업할 수 있는 기준을 정리
-              - 결과 검토와 개선 사이클을 더 빠르게 돌릴 수 있게 기여
+            - refine가 실제로 도움이 되는 케이스와 오히려 악화시키는 케이스를 분리해 설명 가능한 품질 레이어로 정리
+              - 예시별 trade-off를 정리해 "무조건 refine 적용" 같은 잘못된 기본값을 피할 수 있게 함
+              - motion quality regression을 더 체계적으로 해석할 수 있는 기준 확보
+            - 후처리 품질 문제를 서비스 설정 문제까지 연결
+              - stance, length, step, noise 같은 조절점을 운영 가능한 파라미터로 정리
+              - generate / retrieve / refine의 역할 분담을 더 선명하게 만들어 팀 의사결정에 기여
+            - motion refinement를 실제 데모와 endpoint 흐름 안에 통합
+              - 실험 노트를 넘어서 end-to-end 파이프라인 자산으로 전환
+              - 이후 T2M 운영 경로에서 refinement를 선택 가능한 옵션으로 다룰 수 있는 기반 마련
           </p>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260320-media-carousel"></script>
+    <script src="../../showcase.js?v=20260322-markdown-code-blocks"></script>
   </body>
 </html>

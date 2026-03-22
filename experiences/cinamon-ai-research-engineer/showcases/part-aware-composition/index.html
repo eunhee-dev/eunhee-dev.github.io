@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260320-text-to-motion-teaser-gif">
+    <link rel="stylesheet" href="../../showcase.css?v=20260322-markdown-code-blocks">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -25,16 +25,18 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Part-aware Composition</p>
         <h1>🎭 Part-aware Composition</h1>
-        <p class="hero-meta">신체 부위별 특성을 조합해 새로운 모션을 구성합니다.</p>
+        <p class="hero-meta">프로젝트 기간: 2025. 12 - 2026. 01</p>
         <p class="hero-summary">
-          - 서로 다른 모션의 상체, 하체 또는 파트별 특징을 조합해 새로운 결과를 만듭니다.
-          - 파트 간 충돌이나 리듬 붕괴 없이 전체 모션을 자연스럽게 유지하는 것이 핵심입니다.
-          - 아래 미디어에서 서로 다른 조합 결과를 비교해 볼 수 있습니다.
+          복합 모션 프롬프트를 상체·하체·파츠 단위로 분해해 검색, 합성, 보정하는 파이프라인을 탐색했습니다.
+          - `RQ1~RQ3`를 세우고, LLM 의미 분해가 실제로 part-aware generation의 입력이 될 수 있는지 검증했습니다.
+          - `MoRAG-diffuse`, `ParCo`, rule-based concat + diffusion refinement를 병렬로 비교해 어떤 방식이 실제로 쓸 만한지 확인했습니다.
+          - retrieval 품질이 낮으면 이후 단계가 모두 무너지고, refinement는 자연스러움은 높이지만 exact positioning에는 한계가 있다는 점을 정리했습니다.
+          - 하나의 giant model 문제를 decomposition + retrieval + refinement 조합 문제로 재정의한 프로젝트입니다.
         </p>
         <div class="chip-row" aria-label="Part-aware Composition metadata">
-          <span class="chip">Body-part Control</span>
-          <span class="chip">Motion Composition</span>
-          <span class="chip">Content Creation</span>
+          <span class="chip">LLM Decomposition</span>
+          <span class="chip">Retrieval Composition</span>
+          <span class="chip">Diffusion Refinement</span>
         </div>
       </div>
 
@@ -79,38 +81,45 @@
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : 단일 모션 클립 단위로만 활용하면 원하는 동작 조합을 빠르게 만들기 어려움
-              - 상체와 하체처럼 파트별 의도를 따로 제어하기 어려움
-              - 단순 결합 시 파트 간 위화감이나 전체 리듬 붕괴가 발생함
-            - To-be : 파트 단위 조합으로 새로운 모션을 유연하게 생성
-              - 독립적인 파트 제어가 가능해야 함
-              - 전체 모션의 자연스러움과 일관성을 유지해야 함
+            - As-is : 복합 프롬프트를 하나의 생성 모델에 바로 넣으면 상체/하체/세부 gesture 중 일부만 살아남기 쉬움
+              - 방향 전환, 세부 gesture, body-part constraint가 함께 있는 프롬프트에서 제어력이 급격히 떨어짐
+              - 검색 기반 접근은 조합 유연성이 낮고, 단순 concat은 경계가 부자연스러움
+            - To-be : part-aware decomposition + retrieval + composition 파이프라인
+              - LLM이 파트별 의미를 안정적으로 분리할 수 있어야 함
+              - 파트별 검색 결과를 조합한 뒤 refinement로 자연스러움을 회복해야 함
+              - exact positioning이 필요한 케이스와 아닌 케이스를 구분해 한계를 설명할 수 있어야 함
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 파트별 motion representation을 나누고 recomposition 방식 설계
-            - 상체/하체 혹은 limb 단위 특징을 유지한 채 새로운 조합을 생성
-            - 경계 구간에서 발생하는 자세 불연속과 충돌을 줄이기 위한 보정 방향 검토
-            - 다양한 조합 결과를 빠르게 확인할 수 있도록 샘플 생성 및 데모 구성
+            - 테스트용 프롬프트 리스트를 만들고 LLM 의미 분해 태스크를 먼저 검증
+              - `RQ1`: LLM이 파츠별 의미를 잘 분리하는가
+              - `RQ2`: 분리된 파트 정보로 적절한 motion retrieval이 가능한가
+              - `RQ3`: 임의 합성한 결과를 refinement로 자연스럽게 만들 수 있는가
+            - `MoRAG-diffuse` 기반 retrieval + composition, `ParCo` 기반 대안, rule-based concat + diffusion refinement를 병렬 실험
+            - prompt 수정 후 검색 -> 합성 품질 변화를 비교하고, retrieval이 실제 병목인지 refinement가 실제 병목인지 분리해서 확인
+            - refinement 테스트를 통해 자연스러움 향상 범위와 exact pose / position fidelity 한계를 문서화
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 기존 모션 자산을 재조합해 새로운 variation을 만들 수 있는 기반을 마련
-              - 별도 신규 데이터 없이 표현 범위를 확장할 수 있음
-              - 세부 파트 제어를 통해 사용자 의도 반영 폭을 넓힘
-            - 콘텐츠 제작 관점에서 모션 자산의 재사용성과 효율을 높이는 방향을 제시
-              - 결과를 직관적으로 확인할 수 있는 샘플 구조를 정리
-              - 생성 결과 검토와 아이데이션 속도를 높이는 데 기여
+            - 복합 프롬프트 문제를 하나의 end-to-end 생성기 문제가 아니라 조합 가능한 파이프라인 문제로 재구성
+              - 품질 이슈가 LLM decomposition, retrieval, refinement 중 어디서 발생하는지 구분 가능
+              - 제품화 시 디버깅 포인트와 개선 우선순위를 더 명확히 만들 수 있음
+            - part-aware decomposition과 retrieval-based composition이 실제로 의미 있는 접근임을 검증
+              - 후속 T2M retrieval/refine 프로젝트로 이어지는 직접적인 아이디어 자산 확보
+              - 실패 사례까지 포함해 어떤 경우 refinement만으로 해결되지 않는지 설명 가능
+            - 새로운 giant model을 바로 만들기보다 기존 자산을 조합하는 실용적 경로를 제안
+              - 모션 자산 재사용성과 실험 속도를 동시에 높일 수 있는 방향 제시
+              - 탐색 결과를 후속 파이프라인 설계의 근거로 남김
           </p>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260320-media-carousel"></script>
+    <script src="../../showcase.js?v=20260322-markdown-code-blocks"></script>
   </body>
 </html>
