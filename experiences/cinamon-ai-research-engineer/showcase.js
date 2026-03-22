@@ -3,6 +3,81 @@
     '.hero-summary, [data-markdown-list]'
   );
   var carousels = document.querySelectorAll('[data-media-carousel]');
+  var fencePattern = /^(`{2,})(.*)$/;
+  var inlineCodePattern = /`([^`]+)`/g;
+
+  function appendInlineContent(parent, text) {
+    var fragment =
+      typeof document.createDocumentFragment === 'function'
+        ? document.createDocumentFragment()
+        : null;
+    var target = fragment || parent;
+    var match;
+    var lastIndex = 0;
+
+    inlineCodePattern.lastIndex = 0;
+
+    while ((match = inlineCodePattern.exec(text))) {
+      var codeNode;
+
+      if (match.index > lastIndex) {
+        target.appendChild(
+          document.createTextNode(text.slice(lastIndex, match.index))
+        );
+      }
+
+      codeNode = document.createElement('code');
+      codeNode.textContent = match[1];
+      target.appendChild(codeNode);
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+      target.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    if (fragment) {
+      parent.appendChild(fragment);
+    }
+  }
+
+  function normalizeCodeBlock(lines) {
+    var contentLines = lines.map(function(line) {
+      return line.replace(/\t/g, '  ');
+    });
+    var indents = contentLines
+      .filter(function(line) {
+        return line.trim().length > 0;
+      })
+      .map(function(line) {
+        return line.match(/^ */)[0].length;
+      });
+    var minIndent = indents.length
+      ? indents.reduce(function(minValue, indent) {
+          return Math.min(minValue, indent);
+        }, indents[0])
+      : 0;
+
+    return contentLines
+      .map(function(line) {
+        return line.trim().length ? line.slice(minIndent) : '';
+      })
+      .join('\n');
+  }
+
+  function appendCodeBlock(parent, lines, language) {
+    var pre = document.createElement('pre');
+    var code = document.createElement('code');
+
+    if (language) {
+      code.className = 'language-' + language;
+      code.setAttribute('data-language', language);
+    }
+
+    code.textContent = normalizeCodeBlock(lines);
+    pre.appendChild(code);
+    parent.appendChild(pre);
+  }
 
   markdownListBlocks.forEach(function(block) {
     var lines = block.textContent.split(/\r?\n/);
@@ -19,6 +94,11 @@
         };
       })
       .filter(Boolean);
+    var hasCodeFence = lines.some(function(line) {
+      return fencePattern.test(line.trim());
+    });
+    inlineCodePattern.lastIndex = 0;
+    var hasInlineCode = inlineCodePattern.test(block.textContent);
     var hasMarkdownList = bulletLines.length > 0;
     var baseIndent = hasMarkdownList
       ? bulletLines.reduce(function(minIndent, bulletLine) {
@@ -28,6 +108,7 @@
     var replacement;
     var paragraphLines = [];
     var listStack = [];
+    var codeBlockState = null;
 
     function flushParagraph() {
       var paragraph;
@@ -37,7 +118,7 @@
       }
 
       paragraph = document.createElement('p');
-      paragraph.textContent = paragraphLines.join(' ');
+      appendInlineContent(paragraph, paragraphLines.join(' '));
       replacement.appendChild(paragraph);
       paragraphLines = [];
     }
@@ -51,6 +132,18 @@
 
       parent.appendChild(list);
       return list;
+    }
+
+    function getCurrentContainer() {
+      var currentEntry;
+
+      if (!listStack.length) {
+        return replacement;
+      }
+
+      currentEntry = listStack[listStack.length - 1];
+
+      return currentEntry.lastItem || replacement;
     }
 
     function getListEntry(relativeIndent) {
@@ -101,7 +194,20 @@
       return currentEntry;
     }
 
-    if (!hasMarkdownList) {
+    function flushCodeBlock() {
+      if (!codeBlockState) {
+        return;
+      }
+
+      appendCodeBlock(
+        codeBlockState.parent,
+        codeBlockState.lines,
+        codeBlockState.language
+      );
+      codeBlockState = null;
+    }
+
+    if (!hasMarkdownList && !hasCodeFence && !hasInlineCode) {
       return;
     }
 
@@ -115,14 +221,36 @@
 
     lines.forEach(function(line) {
       var lineMatch = line.match(/^(\s*)[-*+]\s+(.*)$/);
+      var fenceMatch = line.trim().match(fencePattern);
       var trimmedLine = line.trim();
       var listEntry;
       var listItem;
       var relativeIndent;
 
+      if (codeBlockState) {
+        if (trimmedLine === codeBlockState.delimiter) {
+          flushCodeBlock();
+          return;
+        }
+
+        codeBlockState.lines.push(line);
+        return;
+      }
+
       if (!trimmedLine) {
         flushParagraph();
         resetListState();
+        return;
+      }
+
+      if (fenceMatch) {
+        flushParagraph();
+        codeBlockState = {
+          delimiter: fenceMatch[1],
+          language: fenceMatch[2].trim(),
+          lines: [],
+          parent: getCurrentContainer()
+        };
         return;
       }
 
@@ -135,7 +263,7 @@
         listEntry = getListEntry(relativeIndent);
 
         listItem = document.createElement('li');
-        listItem.textContent = lineMatch[2].trim();
+        appendInlineContent(listItem, lineMatch[2].trim());
         listEntry.list.appendChild(listItem);
         listEntry.lastItem = listItem;
         return;
@@ -145,6 +273,7 @@
       paragraphLines.push(trimmedLine);
     });
 
+    flushCodeBlock();
     flushParagraph();
     block.replaceWith(replacement);
   });

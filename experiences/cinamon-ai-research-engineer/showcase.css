@@ -211,6 +211,34 @@ h3 {
   line-height: inherit;
 }
 
+.hero-summary-rich code,
+.markdown-list-rich code {
+  padding: 0.08em 0.42em;
+  border-radius: 6px;
+  background: rgba(23, 50, 77, 0.08);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.92em;
+}
+
+.hero-summary-rich pre,
+.markdown-list-rich pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.hero-summary-rich pre code,
+.markdown-list-rich pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+  font-size: 0.9em;
+  line-height: 1.65;
+}
+
 .hero-summary-rich ul,
 .hero-summary-rich ol,
 .markdown-list-rich ul,
@@ -222,7 +250,9 @@ h3 {
 .hero-summary-rich li > ul,
 .hero-summary-rich li > ol,
 .markdown-list-rich li > ul,
-.markdown-list-rich li > ol {
+.markdown-list-rich li > ol,
+.hero-summary-rich li > pre,
+.markdown-list-rich li > pre {
   margin-top: 8px;
 }
 
