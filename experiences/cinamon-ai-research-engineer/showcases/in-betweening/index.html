@@ -28,10 +28,9 @@
         <p class="hero-meta">프로젝트 기간: 2025. 06 - 2025. 11</p>
         <p class="hero-summary">
           임의의 시작/종료 포즈 사이를 자연스럽게 연결하는 motion in-betweening 모델을 고도화했습니다.
-          - Baseline P2P의 failure taxonomy를 먼저 정리해 short move, very long move, similar endpoint에서 왜 drifting / sliding / 멈춤이 발생하는지 분해했습니다.
-          - P2P support model로 MDN 기반 프레임 수 예측기를 개발해 best test `MAE 37`을 확보했고, 비현실적인 길이 조건 입력을 줄였습니다.
-          - DNO 기반 motion in-betweening을 비교해 장거리 연결 자연스러움과 dragging / sliding 감소 효과를 확인했습니다.
-          - 동시에 optimize step `400`, sample generation `33~35초` 수준의 latency trade-off까지 정리해 서비스 적용 범위를 판단했습니다.
+          - Baseline in-betweening model의 failure case 시나리오를 재현해 비교 케이스를 확보했습니다. 
+          - Diffusion noise optimization 기법을 사용해 안정적이고 자연스러운 in-betweening 모델을 확보했습니다.
+          - 사내 데모 페이지에 모델을 통합해 사용 가능한 형태로 배포했으며, 데모 쇼케이스를 제공했습니다.
         </p>
         <div class="chip-row" aria-label="In-betweening metadata">
           <span class="chip">P2P</span>
@@ -49,7 +48,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="기존 시작/종료 구간 사이를 자연스럽게 메우는 transition 결과를 확인할 수 있습니다."
+                data-media-description="데모 페이지에서 시작(초록색)과 종료(빨간색) 구간 사이를 자연스럽게 메우는(파란색) 결과를 확인할 수 있습니다. 직접 모션을 업로드해 테스트할 수도 있습니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening result demo video">
                   <source src="/assets/video/motion-in-betweening.mp4" type="video/mp4">
@@ -59,29 +58,18 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="Baseline P2P failure 사례를 보여주는 샘플로, 시작/종료 포즈가 주어져도 자연스럽지 않은 연결이 발생할 수 있음을 확인할 수 있습니다."
+                data-media-description="짧은 거리 조건에서 발생하는 failure 사례를 보여주는 샘플로, 시작/종료 포즈가 가까운 경우 drifting이 발생합니다."
                 hidden
               >
-                <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening baseline p2p failure demo video">
-                  <source src="/assets/video/motion-in-betweening-failure.mp4" type="video/mp4">
+                <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening short-distance failure demo video">
+                  <source src="/assets/video/motion-in-betweening-failure-short-distance.mp4" type="video/mp4">
                   Your browser does not support the video tag.
                 </video>
               </div>
               <div
                 class="media-slide media-slide-tone-03"
                 data-media-slide
-                data-media-description="길이 조건이 적절하지 않을 때 발생하는 failure 사례를 보여주는 샘플로, 프레임 수 설정이 transition 품질에 직접 영향을 준다는 점을 확인할 수 있습니다."
-                hidden
-              >
-                <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening length condition failure demo video">
-                  <source src="/assets/video/motion-in-betweening-failure-length.mp4" type="video/mp4">
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-              <div
-                class="media-slide media-slide-tone-02"
-                data-media-slide
-                data-media-description="DNO 기반 P2P가 장거리 연결에서 더 자연스러운 움직임을 만드는 샘플을 보여줍니다."
+                data-media-description="(회색) : 원본 모션, (파란색) : 원본 모션의 마지막 포즈를 각각 3m 이동시켜 생성한 구간입니다. DNO 기반 motion in-betweening이 단거리 연결에서 더 자연스러운 전환 모션을 생성합니다. "
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening dno p2p sample demo video">
@@ -92,7 +80,7 @@
               <button class="media-carousel-nav media-carousel-next" type="button" aria-label="Next media" data-media-next>→</button>
             </div>
             <div class="media-carousel-status" aria-live="polite">
-              <span data-media-current>1</span> / <span data-media-total>4</span>
+              <span data-media-current>1</span> / <span data-media-total>3</span>
             </div>
           </div>
           <p class="placeholder-note" data-media-description-target aria-live="polite">
@@ -101,46 +89,43 @@
         </div>
 
         <div class="content-block">
-          <h2>📍 풀어야 했던 문제</h2>
+          <h2>📍 풀어야 했던 문제</h2>    
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : baseline Pose2Pose는 짧은 거리, 매우 긴 길이, intro/outro가 유사한 경우에 drifting, sliding, 멈춤이 자주 발생
-              - 사용자가 길이를 직접 넣으면 비현실적인 duration 때문에 결과가 더 악화될 수 있음
-              - 단순 성능 비교만으로는 언제 어떤 모델을 써야 하는지 설명하기 어려움
-            - To-be : 자연스러운 transition을 생성하는 explainable한 P2P 경로 확보
-              - 입력 pose pair에 맞는 frame length를 자동 예측해야 함
-              - 장거리 이동과 다양한 transition에서 더 자연스러운 후보를 만들 수 있어야 함
-              - 품질뿐 아니라 latency까지 포함해 실제 서비스 적용 범위를 설명할 수 있어야 함
+            - As-is : baseline 모델은 짧은 거리, intro/outro가 유사한 경우에 아티팩트 발생
+              - 짧은 거리 이동시 drifting 후 이동하는 부자연스러운 전환 모션이 생성됨
+              - 모션의 역동성 대비 긴 연결 시간이 주어지는 경우 부자연스러운 전환 모션이 생성됨
+            - To-be : 자연스러운 전환 모션을 생성하는 motion in-betweening 모델 확보
+              - 짧은 거리를 이동하거나, 긴 연결 시간이 주어지는 경우에도 자연스러운 전환 모션을 생성할 수 있는 모델 필요
+              - 임의의 intro/outro 모션에도 자연스러운 전환 모션을 생성할 수 있는 모델 필요
+              - 실시간 추론이 가능한 baseline 모델의 latency를 최대한 유지하며 서빙할 수 있어야 함
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - baseline P2P failure taxonomy 정리
+            - Baseline model의 failure case 확보 및 분석 리포트 작성
               - 거리, 길이, endpoint 유사도, 속도 변화에 따라 실패 케이스를 분류
-              - short move / long move / similar endpoint에서의 거동 차이를 비교
-            - P2P support model 개발
-              - DETR과 MDN 계열을 비교하고, Gaussian mixture 기반 길이 예측기를 채택
-              - sigma clamp, entropy, reconstruction loss를 조정해 best test `MAE 37` 확보
-            - DNO motion in-betweening 기반 품질 개선
-              - base diffusion 재학습, DDIM inversion, velocity constraint, short-distance data oversampling 실험
-              - foot sliding, generation time, sampling step을 함께 점검해 trade-off를 정리
-            - P2P ONNX 구조, CI config, support model 통합 경로를 정리해 운영 가능한 형태로 다듬음
+              - Short move / long move / similar endpoint에서의 전환 모션 차이를 비교
+              - 작성한 리포트를 바탕으로 고도화 모델에서 개선이 필요한 구체적인 문제 정의 
+            - Diffusion noise optimization 기반 품질 개선
+              - Pretrained diffusion prior를 이용, 샘플링 시 최적화 기법 적용
+              - Intro/outro motion을 제약으로 두고, 나머지 시퀀스를 랜덤 노이즈로부터 시작
+              - 지정한 최적화 횟수만큼 디노이징을 반복하며 원본 intro/outro 정보와 MSE loss를 줄이는 방향으로 초기 노이즈를 업데이트
+              - 다양한 이동 시나리오에서도 자연스러운 이동 모션이 생성됨 (Media 3)
+            - TorchServe 기반 모델 서빙 및 데모 페이지/쇼케이스 제작
+              - 성능-속도 간 trade-off를 고려한 optimize step 400 설정, 샘플 1개당 소요 시간 약 30초 소요
+              - 이후 진행한 프로젝트에서는 Triton + FastAPI 기반 서빙 로직 적용
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - P2P를 무조건 교체하는 접근이 아니라 baseline과 DNO 각각의 사용 구간을 설명 가능한 상태로 정리
-              - 장거리 연결 자연스러움과 다양성은 DNO가 강하고, 실시간성과 짧은 거리 제어에는 한계가 있다는 점을 명확히 함
-              - 이후 API 통합과 제품 판단의 근거 자료로 활용 가능
-            - 길이 예측 지원 모델을 통해 사용자 입력 부담과 비현실적인 조건 입력을 줄임
-              - 생성 모델을 바꾸지 않고도 결과 안정성을 개선할 수 있는 축을 확보
-              - support model과 배포 구조를 함께 다루는 운영 경험 축적
-            - 품질, latency, 운영 구조를 한 화면에서 함께 설명할 수 있는 showcase 자산 정리
-              - 단순 데모가 아니라 실제 사용 조건을 설명하는 사례로 전환
-              - 후속 runner / 서빙 리팩토링의 기반을 마련
+            - 최적화 기반 motion in-betweening 샘플링 로직 적용, 기존 baseline model의 failure case 해소
+              - Pretrained diffusion model의 prior knowledge를 이용, 유지보수에 필요한 cost 감소 
+              - Baseline과 비교 가능한 성능 리포트를 작성해 의사결정을 위한 근거 자료 제공
+            - Failure case 개선 쇼케이스, API 호출을 통한 모델 추론 데모 제공
           </p>
         </div>
       </div>
