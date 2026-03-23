@@ -27,11 +27,10 @@
         <h1>🎨 Motion Stylization</h1>
         <p class="hero-meta">프로젝트 기간: 2024. 08 - 2025. 02</p>
         <p class="hero-summary">
-          모션의 content는 유지한 채 원하는 style만 반영하는 스타일라이제이션 모델과 내부 활용 도구를 개발했습니다.
-          - 공개 baseline을 직접 비교해 action mismatch에서 발생하는 twist, sequence instability failure case를 정리했습니다.
-          - 시나몬 데이터에 맞춘 자체 style model을 설계하고, VAE 안정화, style penalty, learnable token, stratified training으로 학습 파이프라인을 구축했습니다.
-          - mixed attention DDIM, forward alignment, front direction / length alignment 보정으로 샘플링 품질과 재현성을 개선했습니다.
-          - 여러 후보 생성, FBX viewer, feedback, export가 가능한 내부 툴까지 연결해 연구 결과를 팀 자산으로 전환했습니다.
+          모션의 content는 유지한 채 원하는 style을 적용할 수 있는 스타일라이제이션 모델과 내부 활용 도구를 개발했습니다.
+          - content-style 모션이 unpaired인 제약 아래에서도 사용할 수 있는 스타일라이제이션 모델을 개발했습니다.
+          - PoC 단계에서 Transformer VAE 기반 style model을 설계했고, 후속 고도화 프로젝트에서 mixed attention DDIM 모델로 고도화했습니다.
+          - Streamlit 기반 데모 페이지를 제작하고 FBX viewer를 연동해 사내 모션 증강 툴로서 기능을 검증했습니다.
         </p>
         <div class="chip-row" aria-label="Motion Stylization metadata">
           <span class="chip">Style Model</span>
@@ -49,7 +48,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="동일한 동작을 다른 스타일로 변환한 결과를 확인할 수 있습니다."
+                data-media-description="(왼쪽) content motion, (가운데) style motion, (오른쪽) style이 적용된 모션, 동일한 동작을 다른 스타일로 변환한 결과를 확인할 수 있습니다."
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Stylization dance-to-zombie demo video">
                   <source src="/assets/video/motion-stylization-dance-to-zombie.mp4" type="video/mp4">
@@ -59,7 +58,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="스타일 변환 워크플로우를 이해할 수 있는 보조 예시 영상을 제공합니다."
+                data-media-description="(회색) content motion, (왼쪽 2개 쌍) style과 content motion간 유사한 kinematic feature를 가지는 경우, (오른쪽 2개 쌍) style과 content motion의 kinematic feature가 상이한 경우 - 아티팩트가 생성됩니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="Motion Stylization motion matching zombie dance example video">
@@ -81,46 +80,58 @@
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : 공개 스타일라이제이션 모델만으로는 시나몬 데이터 표현과 리그 맥락을 안정적으로 반영하기 어려움
-              - content와 style action이 멀어질수록 body twist, sequence collapse, drift가 쉽게 발생
-              - style effect가 약하면 결과가 밋밋하고, 반대로 강하면 원본 동작 의미가 무너짐
-              - 연구 코드 수준에 머물면 내부 데이터 증강이나 실제 활용으로 연결되기 어려움
-            - To-be : 시나몬 데이터에 맞춘 콘텐츠 보존형 스타일 변환 경로 확보
-              - content fidelity, style strength, sequence stability를 함께 만족해야 함
-              - 내부 표현과 데이터 분포에 맞는 자체 학습 구조가 필요
-              - 반복 사용 가능한 샘플링 경로와 내부 활용 도구가 필요
+            - As-is : Content motion의 맥락을 유지하며 사용자가 지정하는 스타일을 반영하는 신규 모델 필요
+              - 해당 모델을 학습하기 위한 신규 데이터셋 정의 및 모션 캡쳐 필요
+              - Content와 style motion이 일대일 대응하지 않는 unpaired scenario에서도 동작할 수 있어야 함
+              - 스타일 반영 정도를 사용자가 지정할 수 있어야 함
+              - CLI 방식에 익숙하지 않은 기획자, 애니메이터도 사용할 수 있는 I/O 구조 및 데모 확보
+            - To-be : 콘텐츠를 보존할 수 있는 스타일 변환 모델 확보
+              - STYLE100 데이터를 레퍼런스로 사용한 자체 스타일 모션 데이터셋 확보
+              - Unpaired style transfer 선행연구 탐색을 통한 최적 아키텍쳐 설계
+              - 모델 사용 편의성 개선 및 모션 증강 툴 사내 데모 배포
+              
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - `Unpaired Motion Style Transfer`, `MCM-LDM Style Transfer`, `MoST`, `Motion Puzzle`을 동일 비교축으로 실험
-              - 어떤 조건에서 style transfer가 성립하고 action mismatch에서 어떻게 무너지는지 failure case 정리
-            - 시나몬 데이터 전용 style model 개발
-              - `Conv1D` / `Transformer` 기반 VAE를 안정화해 base autoencoder 구축
-              - style penalty, learnable token, hyperparameter 조정, stratified training으로 style supervision 설계
-            - 샘플링 경로 고도화
-              - mixed attention DDIM, forward alignment, front direction 반영, content/style length alignment 보정
-              - sampling bugfix, caching, 데모/문서화를 통해 반복 가능한 생성 경로로 정리
-            - 내부 증강 툴 개발
-              - content motion + style label 기반 batch generation
-              - FBX viewer, feedback, export, cache, usage doc까지 포함한 내부 페이지 구성
+            - PoC : Transformer VAE 기반 motion style transfer
+              - AdaIN의 beta term을 입력 가능한 항목으로 받아 스타일 적용 강도를 명시적으로 조절할 수 있게 설계
+              - 전체 데이터를 대상으로 random split 시 스타일 간 균형적인 train-test-val 구성이 이루어지지 않음을 확인, stratified sampling을 적용해 학습용 데이터셋 재정의
+              - 2-Stage latent VAE 접근법으로 style-invariant한 content encoder, style을 명시적으로 주입하는 generator 설계
+                - Stage 1 : Motion-only VAE 학습 (frozen)
+                - Stage 2 : Content encoder, style generator 동시 학습
+                  - Content encoder : motion latent로부터 content latent를 재 인코딩
+                  - Style generator : content latent와 CLIP style embedding을 입력받아 새 latent 생성
+                - 학습시 motion space에서 원본 모션을 재구성하도록 유도하는 reconstruction loss, 스타일 스왑 후 원본 latent로 복원되도록 유도하는 cycle loss를 함께 사용
+            - 고도화 : Mixed attention 기반 motion style transfer
+              - PoC를 통해 상이한 motion 정보의 feature를 교환하는 방식으로 스타일 변환 가능성 확인
+              - Transformer decoder 기반의 pre-trained diffusion model이 학습한 prior knowledge를 샘플링 시 활용
+              - 라벨 기반으로 작동하지 않기 때문에 데이터셋의 제약을 받지 않음, 로직상으로는 임의 스타일의 모션에 대해 확장 가능함
+              - 추론시, attention 연산 중 content와 style motion의 정보 교환을 명시적으로 수행
+                - DDIM sampling 방식 적용, content와 style motion의 deterministic한 noise trajectory 확보
+                - 이때, decoder layer와 timestep별 중간 상태를 캐싱
+                - 시작 noise로 content motion의 inverted noise를 사용, sampling 중간 layer의 cross attention 연산시 Key/Value로 활용
+            - 유저 친화적 I/O 구조 및 모션 증강 툴 데모 페이지 제작
+              - 고도화 프로젝트는 motion(FBX)을 입력으로 받으며, 성능이 입력된 motion 품질에 의존함
+                - 예) content와 style motion의 맥락이 걷기 - 눕기처럼 global translation, velocity가 매우 상이한 경우 아티팩트가 발생함
+              - 실제 사용 시나리오에서는 PoC처럼 라벨 형태로 스타일을 선택해 적용하는 I/O 구조를 유지
+                - 후보 스타일 모션들의 kinematic feature를 계산해 캐싱해둔 뒤, input motion과 유사도가 높은 모션을 선택해 내부적으로 mixed attention sampling logic을 따르도록 설계
+  
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 범용 baseline 탐색부터 자체 모델, 샘플링 제어, 내부 툴화까지 이어지는 전체 경로를 구축
-              - 스타일라이제이션을 실험 데모가 아니라 내부 자산 증강 수단으로 전환
-              - 후속 diffusion/attention 고도화와 조직 내 활용 방향을 동시에 열어 둠
-            - failure taxonomy를 먼저 만들고 개선축을 분명히 정리
-              - content preservation, style strength, sequence stability라는 평가 축을 정착
-              - 이후 실험이 막연한 모델 교체가 아니라 구조적 개선으로 이어지게 기여
-            - 비연구자도 결과를 확인하고 선택할 수 있는 사용 경로 마련
+            - 프로젝트를 위해 필요한 모션캡쳐 데이터 리서치 및 기획
+            - PoC-고도화-데모 페이지 구축으로 이어지는 단계별 마일스톤 설계
+            - 데모 페이지를 통해 결과를 확인하고 선택할 수 있는 사용 경로 마련
               - 여러 후보를 빠르게 비교하고 FBX로 검토 가능한 흐름 제공
-              - 실제 운영 friction을 조기에 드러내 후속 개선 포인트를 확보
+              - 후속 개선 포인트를 확보해 서비스 기획 측면 의사결정에 기여
+            - 사용자의 입력 구조를 단순화하고 품질 일관성을 확보하는 유저 친화적 설계
+              - 복잡한 입력 구조를 모델 내부에서 처리하도록 숨기고, 사용자는 간단한 입력 구조를 유지하도록 모델 설계 
           </p>
         </div>
       </div>
