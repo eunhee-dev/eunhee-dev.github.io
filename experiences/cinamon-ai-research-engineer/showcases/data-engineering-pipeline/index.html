@@ -25,13 +25,11 @@
       <div class="case-hero">
         <p class="eyebrow">Cinamon Inc. · Data Engineering Pipeline</p>
         <h1>🛠️ Data Engineering Pipeline</h1>
-        <p class="hero-meta">프로젝트 기간: 2025. 05 - 2026. 01</p>
+        <p class="hero-meta">프로젝트 기간: 2025. 05 - 2026. 01 (상시 진행)</p>
         <p class="hero-summary">
-          학습과 서비스에 쓰이는 모션 데이터를 신뢰 가능한 상태로 만들기 위해 전처리, metadata, canonicalize, 검수 경로를 단계적으로 리팩토링했습니다.
-          - root floating / sinking 이슈를 단순 필터링 문제가 아니라 representation 문제로 추적해, `convert_to_motion` 내 quaternion normalization을 실제 해결책으로 정리했습니다.
-          - Airflow preprocessing refactor, valid-area filtering bug fix, metadata 기준 일원화로 downstream이 실제 정제 결과를 반영하도록 수정했습니다.
-          - support model / warning / body ratio / test 체계를 정리해 운영 파이프라인의 예측 가능성을 높였습니다.
-          - orientation canonicalize, pelvis-based canonicalize, prop bone, gender retarget, BABEL preprocessing까지 묶어 데이터-모델 호환성 기반을 만들었습니다.
+          모델 학습용 데이터 전처리를 Airflow 기반으로 자동화/모니터링 가능하도록 운영 파이프라인을 개선했습니다. 데이터 시트와 모션 검증 로직을 개선해 아티팩트를 유발할 수 있는 모션 데이터를 학습용 데이터에서 제거했습니다.
+          - 수동 전처리 스크립트 실행으로 인한 모델 학습 지연 병목을 없애 업무 생산성에 기여했습니다. 
+          - 학습에 사용되는 일부 OOD 데이터의 문제점을 발견, 실제 모션 데이터를 읽어 서비스 시나리오에 맞는 추가 필터링 로직을 적용했습니다.
         </p>
         <div class="chip-row" aria-label="Data Engineering Pipeline metadata">
           <span class="chip">Airflow</span>
@@ -49,7 +47,7 @@
               <div
                 class="media-slide media-slide-tone-01 is-active"
                 data-media-slide
-                data-media-description="전처리, filtering, metadata, canonicalize가 연결된 운영 파이프라인 구조를 한눈에 보여줍니다."
+                data-media-description="세부 task로 관리하는 모션 데이터 전처리 파이프라인 사례, task 단위로 실행 소요 시간을 트래킹할 수 있습니다."
               >
                 <img src="/assets/images/data-engineering-pipeline.png" alt="Data engineering pipeline overview image">
               </div>
@@ -67,46 +65,43 @@
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : filtering 결과와 metadata 기준이 어긋나면 downstream이 잘못된 데이터를 그대로 사용할 수 있음
-              - warning 정책, body ratio, duplicate frame, keyframe, interpolation 이슈가 반복적으로 운영 friction을 만듦
-              - quality issue가 dirty data인지, 전처리인지, representation mismatch인지 분리되지 않으면 잘못된 가설로 시간을 쓰게 됨
-            - To-be : 학습과 서빙이 같은 기준을 공유하는 신뢰 가능한 데이터 파이프라인
-              - Airflow 전처리, metadata, filtering, canonicalize가 일관되게 연결되어야 함
-              - outlier 검수와 representation validation이 함께 돌아야 함
-              - skeleton / body type / prop bone / gender retarget 차이까지 운영 가능한 기준으로 관리해야 함
+            - As-is : 모션캡쳐 데이터 추가는 정기적이나, 모델에 사용하는 데이터 전처리는 정기적으로 이루어지지 않음. 모션 모델의 품질 일관성을 유지하기 위한 데이터 필터링 로직 필요
+              - 정기적인 데이터 추가가 점진적 모델 성능 개선으로 이어지지 않음 
+              - 담당자가 수동으로 전처리 스크립트를 실행하는 방식으로, 담당자 의존성이 매우 높음
+              - 모션 모델의 품질을 저해하는 일부 케이스 존재 → 해당 데이터로 학습한 모델이 반복적으로 아티팩트를 만들어 운영 cost 증가
+              - 폴리싱이 완료되었으나 학습에 포함되지 않은 데이터를 학습 데이터셋에 추가 필요 
+            - To-be : 신뢰 가능한 데이터 전처리 자동화 파이프라인 확보
+              - 정기적인 데이터 업데이트 및 자동화로 운영 cost 감소, 데이터 추가와 모델 성능 개선 시점 간극 감소
+              - 모션 데이터를 로드해 학습용 데이터에 포함 가능한지를 검증하는 rule-based 데이터 필터링 클래스 개발 
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 배포 품질 이슈 원인 분석
-              - 신규 바디 데이터에 outlier 필터를 정의하고 `202 / 9016 (2.24%)`, `186 / 9016 (2.06%)` 수준으로 수치화
-              - root floating의 최종 원인을 intermittent non-unit quaternion으로 특정하고 quaternion normalization 적용
-            - 운영성 리팩토링
-              - support model, warning, body ratio check, deterministic seed, legacy code cleanup, ONNX/MCP 설명 문서 정리
-              - duplicate frame, parsing util, P2P ONNX 구조, CI config, motion browser / warning 정책 개선
-            - Airflow / metadata 리팩토링
-              - filtering 단계를 전처리 흐름에서 명시적으로 분리
-              - valid-area filtering bug fix, Airflow DAG 재구성, metadata 기준 통합
-            - canonicalize / 호환성 정비
-              - orientation canonicalize, pelvis-based canonicalize, prop bone 처리, gender retarget, foot-contact fix
-              - BABEL preprocessing으로 약 `29,000` valid sample 확보, 모델 등록 규격과 configurable API endpoint 정리
+            - Dagster (임시), Airflow 기반 데이터 전처리 자동화 파이프라인 확보
+              -  Timetable 기능을 활용한 커스텀 데이터 스케줄링 적용
+              - 수동 trigger 시 10시간 이상 소요되는 전처리 작업을 매달 마지막 주 주말 오전에 수행하도록 자동화
+            - 모션 데이터 필터링 공통 로직 개발
+              - foot sinking/plunging 탐지
+              - 비정상 height spike 탐지
+              - valid space 이탈 탐지
+              - hovering motion 탐지
+            - 애니메이터와 협업을 통해 학습 가능한 수준의 모션 데이터 품질 기준(keyframe) 명세화
+            - AI Lab 구성원 대상 데이터 전처리 프로세스 세미나 기획 및 진행, 문서화
+            - 데이터 전처리 결과를 실시간으로 확인할 수 있는 대시보드 제작 및 배포
           </p>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 데이터 파이프라인을 "보이는 자동화"가 아니라 실제로 신뢰 가능한 운영 체계로 정리
-              - filtering 결과가 downstream 품질에 반영되는 구조를 확보
-              - 데이터와 metadata가 서로 다른 진실을 말하는 상황을 줄임
-            - 품질 이슈를 데이터 / 전처리 / 표현 안정성으로 분리해 보는 분석 습관을 정착
-              - root floating 같은 문제를 근본 원인까지 추적하는 방식으로 대응
-              - 이후 품질 회귀와 representation mismatch를 더 체계적으로 다룰 수 있게 기여
-            - P2P, MCP, locomotion, T2M, MOAI가 함께 쓸 수 있는 공통 기준 마련
-              - canonicalize와 retargeting 기반이 생기며 모델 간 호환성이 높아짐
-              - 후속 실험과 서비스 연결 비용을 줄이는 운영 자산으로 기능
+            - 데이터 파이프라인을 자동화된 운영 방식으로 정리
+              - 담당자 의존성 제거, 세부 전처리 로직과 진행 상황을 구성원이 자유롭게 확인 가능
+              - 휴일에 자동으로 전처리를 수행하고 주중에 모델 설계 및 학습을 진행할 수 있도록 스케줄러 구성, 구성원 업무 효율성 향상에 기여
+            - 사내 모션 모델이 공통적으로 사용하는 모션 데이터의 품질 기준 작성
+              - 메타데이터 기반 필터링 - rule-based 모션 필터링 2중 구조로 아티팩트를 발생시킬 수 있는 데이터를 일관된 기준으로 제거
+              - Sparse keyframe으로 탐지되어 학습에서 제외되었던 데이터를 포함, 데이터셋 규모 약 30% 증가
           </p>
         </div>
       </div>
