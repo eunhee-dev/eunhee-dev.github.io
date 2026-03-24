@@ -480,6 +480,52 @@ h3 {
   margin-top: 6px;
 }
 
+.architecture-diagram {
+  margin-top: 16px;
+  padding: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--panel-border);
+  background:
+    linear-gradient(180deg, rgba(251, 251, 248, 0.96), rgba(243, 244, 239, 0.92));
+}
+
+.architecture-diagram .mermaid {
+  min-width: max-content;
+  margin: 0;
+  color: var(--muted);
+  white-space: pre;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.architecture-diagram .mermaid[data-processed='true'] {
+  min-width: 100%;
+  color: inherit;
+  white-space: normal;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: normal;
+}
+
+.architecture-diagram .mermaid[data-processed='true'] svg {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.architecture-diagram .mermaid[data-processed='true'] svg .nodeLabel,
+.architecture-diagram .mermaid[data-processed='true'] svg .edgeLabel {
+  color: var(--text);
+}
+
+.architecture-diagram .mermaid-fallback {
+  min-width: 100%;
+}
+
 .media-block {
   position: static;
 }
@@ -640,6 +686,10 @@ h3 {
   .showcase-card,
   .content-block {
     padding: 16px 0 0;
+  }
+
+  .architecture-diagram {
+    padding: 12px;
   }
 
   .media-carousel-nav {
