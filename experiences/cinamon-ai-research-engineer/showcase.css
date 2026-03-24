@@ -501,6 +501,7 @@ h3 {
 
 .architecture-diagram {
   margin-top: 16px;
+  margin-bottom: 20px;
   padding: 16px;
   overflow-x: auto;
   border: 1px solid var(--panel-border);
