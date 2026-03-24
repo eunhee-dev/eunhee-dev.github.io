@@ -27,10 +27,9 @@
         <h1>🎨 Motion Stylization</h1>
         <p class="hero-meta">프로젝트 기간: 2024. 08 - 2025. 02</p>
         <p class="hero-summary">
-          모션의 content는 유지한 채 원하는 style을 적용할 수 있는 스타일라이제이션 모델과 내부 활용 도구를 개발했습니다.
-          - content-style 모션이 unpaired인 제약 아래에서도 사용할 수 있는 스타일라이제이션 모델을 개발했습니다.
-          - PoC 단계에서 Transformer VAE 기반 style model을 설계했고, 후속 고도화 프로젝트에서 mixed attention DDIM 모델로 고도화했습니다.
-          - Streamlit 기반 데모 페이지를 제작하고 FBX viewer를 연동해 사내 모션 증강 툴로서 기능을 검증했습니다.
+          콘텐츠 모션의 의미를 유지한 채 원하는 스타일을 적용하는 motion stylization 모델과 내부 검증 도구를 개발했습니다.
+          unpaired setting에서도 동작하는 Transformer VAE 기반 PoC를 시작으로 mixed attention DDIM 방식으로 고도화했고, Streamlit 데모와 FBX viewer를 연동해 비전문가도 결과를 검토할 수 있는 워크플로를 만들었습니다.
+          연구 검증에서 끝나지 않고 실제 사용 시나리오에 맞는 입력 구조까지 함께 설계했습니다.
         </p>
         <div class="chip-row" aria-label="Motion Stylization metadata">
           <span class="chip">Style Model</span>
@@ -80,15 +79,15 @@
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - As-is : Content motion의 맥락을 유지하며 사용자가 지정하는 스타일을 반영하는 신규 모델 필요
-              - 해당 모델을 학습하기 위한 신규 데이터셋 정의 및 모션 캡쳐 필요
-              - Content와 style motion이 일대일 대응하지 않는 unpaired scenario에서도 동작할 수 있어야 함
-              - 스타일 반영 정도를 사용자가 지정할 수 있어야 함
-              - CLI 방식에 익숙하지 않은 기획자, 애니메이터도 사용할 수 있는 I/O 구조 및 데모 확보
-            - To-be : 콘텐츠를 보존할 수 있는 스타일 변환 모델 확보
-              - STYLE100 데이터를 레퍼런스로 사용한 자체 스타일 모션 데이터셋 확보
-              - Unpaired style transfer 선행연구 탐색을 통한 최적 아키텍쳐 설계
-              - 모델 사용 편의성 개선 및 모션 증강 툴 사내 데모 배포
+            - As-is : 사용자가 지정한 스타일을 반영하면서도 원래 모션의 맥락을 유지하는 신규 모델이 필요했습니다.
+              - 이를 학습하기 위한 신규 데이터셋 정의와 모션 캡처가 필요함
+              - 콘텐츠 모션과 스타일 모션이 일대일로 대응하지 않는 unpaired scenario에서도 동작해야 함
+              - 스타일 반영 정도를 사용자가 직접 조절할 수 있어야 함
+              - CLI에 익숙하지 않은 기획자와 애니메이터도 사용할 수 있는 입력/출력 구조와 데모가 필요함
+            - To-be : 콘텐츠를 보존할 수 있는 스타일 변환 모델을 확보하고자 했습니다.
+              - STYLE100을 참고한 자체 스타일 모션 데이터셋 확보
+              - unpaired style transfer 선행연구를 바탕으로 최적의 아키텍처 설계
+              - 사용 편의성을 개선한 모션 증강 툴 형태의 사내 데모 배포
               
           </p>
         </div>
@@ -96,28 +95,28 @@
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - PoC : Transformer VAE 기반 motion style transfer
-              - AdaIN의 beta term을 입력 가능한 항목으로 받아 스타일 적용 강도를 명시적으로 조절할 수 있게 설계
-              - 전체 데이터를 대상으로 random split 시 스타일 간 균형적인 train-test-val 구성이 이루어지지 않음을 확인, stratified sampling을 적용해 학습용 데이터셋 재정의
-              - 2-Stage latent VAE 접근법으로 style-invariant한 content encoder, style을 명시적으로 주입하는 generator 설계
-                - Stage 1 : Motion-only VAE 학습 (frozen)
-                - Stage 2 : Content encoder, style generator 동시 학습
-                  - Content encoder : motion latent로부터 content latent를 재 인코딩
-                  - Style generator : content latent와 CLIP style embedding을 입력받아 새 latent 생성
-                - 학습시 motion space에서 원본 모션을 재구성하도록 유도하는 reconstruction loss, 스타일 스왑 후 원본 latent로 복원되도록 유도하는 cycle loss를 함께 사용
-            - 고도화 : Mixed attention 기반 motion style transfer
-              - PoC를 통해 상이한 motion 정보의 feature를 교환하는 방식으로 스타일 변환 가능성 확인
-              - Transformer decoder 기반의 pre-trained diffusion model이 학습한 prior knowledge를 샘플링 시 활용
-              - 라벨 기반으로 작동하지 않기 때문에 데이터셋의 제약을 받지 않음, 로직상으로는 임의 스타일의 모션에 대해 확장 가능함
-              - 추론시, attention 연산 중 content와 style motion의 정보 교환을 명시적으로 수행
-                - DDIM sampling 방식 적용, content와 style motion의 deterministic한 noise trajectory 확보
-                - 이때, decoder layer와 timestep별 중간 상태를 캐싱
-                - 시작 noise로 content motion의 inverted noise를 사용, sampling 중간 layer의 cross attention 연산시 Key/Value로 활용
-            - 유저 친화적 I/O 구조 및 모션 증강 툴 데모 페이지 제작
-              - 고도화 프로젝트는 motion(FBX)을 입력으로 받으며, 성능이 입력된 motion 품질에 의존함
-                - 예) content와 style motion의 맥락이 걷기 - 눕기처럼 global translation, velocity가 매우 상이한 경우 아티팩트가 발생함
-              - 실제 사용 시나리오에서는 PoC처럼 라벨 형태로 스타일을 선택해 적용하는 I/O 구조를 유지
-                - 후보 스타일 모션들의 kinematic feature를 계산해 캐싱해둔 뒤, input motion과 유사도가 높은 모션을 선택해 내부적으로 mixed attention sampling logic을 따르도록 설계
+            - PoC : Transformer VAE 기반 motion style transfer를 설계했습니다.
+              - AdaIN의 beta term을 입력 가능한 항목으로 받아 스타일 적용 강도를 명시적으로 조절할 수 있게 했습니다.
+              - 전체 데이터를 무작위 분할할 경우 스타일 간 train-test-val 균형이 무너지는 문제를 확인하고, stratified sampling을 적용해 학습용 데이터셋을 다시 정의했습니다.
+              - 2-stage latent VAE 접근으로 style-invariant content encoder와 style generator를 설계했습니다.
+                - Stage 1 : motion-only VAE 학습
+                - Stage 2 : content encoder와 style generator 동시 학습
+                  - content encoder는 motion latent로부터 content latent를 다시 인코딩함
+                  - style generator는 content latent와 CLIP style embedding을 입력받아 새로운 latent를 생성함
+                - 원본 모션 재구성을 위한 reconstruction loss와 스타일 스왑 후 원래 latent로 복원시키는 cycle loss를 함께 사용함
+            - 고도화 : mixed attention 기반 motion style transfer로 확장했습니다.
+              - PoC를 통해 서로 다른 motion feature를 교환하는 방식으로 스타일 변환이 가능함을 확인했습니다.
+              - Transformer decoder 기반 pre-trained diffusion model의 prior knowledge를 샘플링 과정에 활용했습니다.
+              - 라벨 기반 모델이 아니어서 데이터셋 제약을 덜 받고, 로직상 임의 스타일의 모션으로 확장 가능한 구조를 설계했습니다.
+              - 추론 시 attention 연산 중 콘텐츠 모션과 스타일 모션의 정보를 명시적으로 교환했습니다.
+                - DDIM sampling을 적용해 deterministic한 noise trajectory를 확보했습니다.
+                - decoder layer와 timestep별 중간 상태를 캐싱했습니다.
+                - content motion의 inverted noise를 시작점으로 사용하고, sampling 중간 layer의 cross attention에서 Key/Value로 활용했습니다.
+            - 유저 친화적인 입력/출력 구조와 모션 증강 툴 데모 페이지를 제작했습니다.
+              - 고도화 프로젝트는 motion(FBX)을 입력으로 받기 때문에, 입력 모션 품질에 따라 결과 품질이 달라질 수 있음을 함께 검증했습니다.
+                - 예) 콘텐츠 모션과 스타일 모션의 맥락이 걷기와 눕기처럼 크게 다르면 global translation과 velocity 차이로 아티팩트가 발생할 수 있음
+              - 실제 사용 시나리오에서는 PoC처럼 라벨 형태로 스타일을 선택하는 간단한 입력 구조를 유지했습니다.
+                - 후보 스타일 모션의 kinematic feature를 미리 계산해 캐싱하고, 입력 모션과 유사한 모션을 선택해 내부적으로 mixed attention sampling 로직을 따르도록 설계했습니다.
   
           </p>
         </div>
@@ -125,13 +124,13 @@
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 프로젝트를 위해 필요한 모션캡쳐 데이터 리서치 및 기획
-            - PoC-고도화-데모 페이지 구축으로 이어지는 단계별 마일스톤 설계
-            - 데모 페이지를 통해 결과를 확인하고 선택할 수 있는 사용 경로 마련
-              - 여러 후보를 빠르게 비교하고 FBX로 검토 가능한 흐름 제공
-              - 후속 개선 포인트를 확보해 서비스 기획 측면 의사결정에 기여
-            - 사용자의 입력 구조를 단순화하고 품질 일관성을 확보하는 유저 친화적 설계
-              - 복잡한 입력 구조를 모델 내부에서 처리하도록 숨기고, 사용자는 간단한 입력 구조를 유지하도록 모델 설계 
+            - 프로젝트에 필요한 모션 캡처 데이터 리서치와 기획을 수행했습니다.
+            - PoC, 고도화, 데모 페이지 구축으로 이어지는 단계별 마일스톤을 설계했습니다.
+            - 데모 페이지를 통해 결과를 확인하고 선택할 수 있는 사용 경로를 마련했습니다.
+              - 여러 후보를 빠르게 비교하고 FBX로 검토할 수 있는 흐름을 제공했습니다.
+              - 후속 개선 포인트를 확보해 서비스 기획 측면의 의사결정에 기여했습니다.
+            - 사용자의 입력 구조를 단순화하고 품질 일관성을 확보하는 방향으로 설계했습니다.
+              - 복잡한 입력 구조는 모델 내부에서 처리하고, 사용자는 간단한 입력 형태만 유지하도록 구성했습니다.
           </p>
         </div>
       </div>
