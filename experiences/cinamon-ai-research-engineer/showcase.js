@@ -5,6 +5,8 @@
   var carousels = document.querySelectorAll('[data-media-carousel]');
   var fencePattern = /^(`{2,})(.*)$/;
   var inlineCodePattern = /`([^`]+)`/g;
+  var TEXT_NODE = 3;
+  var ELEMENT_NODE = 1;
 
   function appendTextNode(parent, text) {
     if (!text) {
@@ -131,8 +133,49 @@
     parent.appendChild(pre);
   }
 
+  function getBlockSourceText(block) {
+    var source = '';
+
+    Array.prototype.slice.call(block.childNodes).forEach(function(node) {
+      if (node.nodeType === TEXT_NODE) {
+        source += node.textContent;
+        return;
+      }
+
+      if (node.nodeType === ELEMENT_NODE && node.tagName === 'BR') {
+        source += '\n';
+      }
+    });
+
+    return source;
+  }
+
+  function hasFollowingEmbeddedSibling(node) {
+    var sibling = node.nextSibling;
+
+    while (sibling) {
+      if (sibling.nodeType === TEXT_NODE) {
+        if (sibling.textContent.trim()) {
+          return false;
+        }
+
+        sibling = sibling.nextSibling;
+        continue;
+      }
+
+      if (sibling.nodeType === ELEMENT_NODE && sibling.tagName === 'BR') {
+        return false;
+      }
+
+      return sibling.nodeType === ELEMENT_NODE;
+    }
+
+    return false;
+  }
+
   markdownListBlocks.forEach(function(block) {
-    var lines = block.textContent.split(/\r?\n/);
+    var sourceText = getBlockSourceText(block);
+    var lines = sourceText.split(/\r?\n/);
     var bulletLines = lines
       .map(function(line) {
         var match = line.match(/^(\s*)[-*+]\s+(.*)$/);
@@ -150,9 +193,12 @@
       return fencePattern.test(line.trim());
     });
     inlineCodePattern.lastIndex = 0;
-    var hasInlineCode = inlineCodePattern.test(block.textContent);
+    var hasInlineCode = inlineCodePattern.test(sourceText);
     var hasInlineHighlight = lines.some(function(line) {
       return Boolean(findHighlightRange(line));
+    });
+    var hasEmbeddedBlocks = Array.prototype.slice.call(block.children).some(function(node) {
+      return node.tagName !== 'BR';
     });
     var hasMarkdownList = bulletLines.length > 0;
     var baseIndent = hasMarkdownList
@@ -164,6 +210,7 @@
     var paragraphLines = [];
     var listStack = [];
     var codeBlockState = null;
+    var preserveListContext = false;
 
     function flushParagraph() {
       var paragraph;
@@ -262,19 +309,7 @@
       codeBlockState = null;
     }
 
-    if (!hasMarkdownList && !hasCodeFence && !hasInlineCode && !hasInlineHighlight) {
-      return;
-    }
-
-    replacement = document.createElement('div');
-    replacement.className = (block.className ? block.className + ' ' : '') +
-      'markdown-list-rich';
-
-    if (block.classList.contains('hero-summary')) {
-      replacement.classList.add('hero-summary-rich');
-    }
-
-    lines.forEach(function(line) {
+    function processLine(line) {
       var lineMatch = line.match(/^(\s*)[-*+]\s+(.*)$/);
       var fenceMatch = line.trim().match(fencePattern);
       var trimmedLine = line.trim();
@@ -293,10 +328,17 @@
       }
 
       if (!trimmedLine) {
+        if (preserveListContext && listStack.length) {
+          preserveListContext = false;
+          return;
+        }
+
         flushParagraph();
         resetListState();
         return;
       }
+
+      preserveListContext = false;
 
       if (fenceMatch) {
         flushParagraph();
@@ -326,7 +368,50 @@
 
       resetListState();
       paragraphLines.push(trimmedLine);
-    });
+    }
+
+    if (!hasMarkdownList && !hasCodeFence && !hasInlineCode && !hasInlineHighlight && !hasEmbeddedBlocks) {
+      return;
+    }
+
+    replacement = document.createElement('div');
+    replacement.className = (block.className ? block.className + ' ' : '') +
+      'markdown-list-rich';
+
+    if (block.classList.contains('hero-summary')) {
+      replacement.classList.add('hero-summary-rich');
+    }
+
+    if (hasEmbeddedBlocks) {
+      Array.prototype.slice.call(block.childNodes).forEach(function(node) {
+        if (node.nodeType === TEXT_NODE) {
+          var textLines = node.textContent.split(/\r?\n/);
+
+          if (hasFollowingEmbeddedSibling(node)) {
+            while (textLines.length && !textLines[textLines.length - 1].trim()) {
+              textLines.pop();
+            }
+          }
+
+          textLines.forEach(processLine);
+          return;
+        }
+
+        if (node.nodeType === ELEMENT_NODE && node.tagName === 'BR') {
+          processLine('');
+          return;
+        }
+
+        if (node.nodeType === ELEMENT_NODE) {
+          flushCodeBlock();
+          flushParagraph();
+          getCurrentContainer().appendChild(node.cloneNode(true));
+          preserveListContext = Boolean(listStack.length);
+        }
+      });
+    } else {
+      lines.forEach(processLine);
+    }
 
     flushCodeBlock();
     flushParagraph();

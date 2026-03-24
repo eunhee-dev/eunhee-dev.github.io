@@ -272,6 +272,25 @@ h3 {
   margin-top: 8px;
 }
 
+.hero-summary-rich details,
+.markdown-list-rich details {
+  margin-top: 10px;
+}
+
+.hero-summary-rich summary,
+.markdown-list-rich summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.hero-summary-rich details[open] > summary,
+.markdown-list-rich details[open] > summary {
+  margin-bottom: 10px;
+}
+
 .hero-summary-rich > ul > li + li,
 .hero-summary-rich > ol > li + li,
 .markdown-list-rich > ul > li + li,
