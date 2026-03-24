@@ -27,9 +27,9 @@
         <h1>🎭 Part-aware Composition</h1>
         <p class="hero-meta">프로젝트 기간: 2025. 12 - 2026. 01</p>
         <p class="hero-summary">
-          복잡한 텍스트 프롬프트를 상·하체 수준의 제어 가능한 동작 표현으로 분해해 모션 표현의 다양성을 높이는 PoC를 진행했습니다.
-          LLM 기반 prompt decomposition, retrieval composition, refinement를 독립 모듈로 설계해 빠르게 검증 가능한 파이프라인으로 재구성했고, 복합 프롬프트에서 무너지는 motion-text alignment 문제를 실용적으로 다뤘습니다.
-          기존 모델을 재사용하면서도 디버깅 가능한 연구 구조를 만든 점이 핵심 성과입니다.
+          복잡한 텍스트 프롬프트를 ==상·하체 수준의 제어 가능한 동작 표현==으로 분해해 모션 표현의 다양성을 높이는 PoC를 진행했습니다.
+          ==LLM 기반 prompt decomposition==, retrieval composition, refinement를 독립 모듈로 설계해 빠르게 검증 가능한 파이프라인으로 재구성했고, 복잡도가 높은 프롬프트에서 무너지는 motion-text alignment 문제를 완화할 수 있는 컨셉을 검증했습니다. 
+          기존 모델을 재사용하면서도 모듈 단위로 디버깅/자산화 할 수 있는 연구 구조를 설계했습니다.
         </p>
         <div class="chip-row" aria-label="Part-aware Composition metadata">
           <span class="chip">LLM Decomposition</span>
@@ -70,7 +70,7 @@
           <p class="content-markdown-list" data-markdown-list>
             - As-is : 복잡한 프롬프트를 생성 모델이나 검색 모델에 그대로 사용하면 motion-text alignment가 낮아지고 안정적으로 표현 가능한 범위가 줄어드는 문제가 있었습니다.
               - 방향 전환, 세부 gesture, body-part constraint가 함께 포함된 프롬프트에서 제어력이 급격히 떨어짐
-            - To-be : part-aware decomposition, retrieval, composition 파이프라인이 필요했습니다.
+            - To-be : ==part-aware decomposition, retrieval, composition== 파이프라인이 필요했습니다.
               - 파트별 의미를 안정적으로 분리하는 LLM 기반 prompt refinement
               - 검색 모델을 이용해 상·하체별 모션 검색 결과를 결합하는 방식
               - 결합 과정에서 생기는 아티팩트는 보정 모델을 통해 자연스럽게 완화
@@ -84,11 +84,11 @@
               - RQ1 : LLM이 파트별 의미를 잘 분리하는가
               - RQ2 : 분리된 파트 정보로 적절한 motion retrieval이 가능한가
               - RQ3 : 임의로 합성한 결과를 refinement 네트워크로 자연스럽게 만들 수 있는가
-            - 검색 모델 데이터셋 구축에 사용한 VLM prompt를 분석하고, facial expression을 제외한 더 저수준의 구체적인 검색 문장으로 refinement하도록 system prompt를 작성했습니다.
+            - 검색 모델 데이터셋 구축에 사용한 VLM prompt를 분석하고, facial expression을 제외한 더 저수준의 구체적인 검색 문장으로 refinement하도록 ==system prompt==를 작성했습니다.
               - 예) 'Raise one hand and check the time on the watch'에 대한 검색용 prompt refinement
                 - UpperBody: The person lifts their left arm and turns the wrist slightly.
                 - LowerBody: The person stands still with legs relaxed and feet firmly on the ground.
-            - 분리한 상·하체 prompt로 각각 모션을 검색한 뒤, joint별 local rotation 정보를 조합해 합성했습니다.
+            - 분리한 상·하체 prompt로 각각 모션을 검색한 뒤, ==joint별 local rotation== 정보를 조합해 합성했습니다.
             - 1-step denoising 기반 motion refinement를 적용해 모션 보정 모델의 독립 모듈화 가능성을 검증했습니다.
           </p>
         </div>
@@ -96,11 +96,11 @@
         <div class="content-block">
           <h2>📍 기여한 점</h2>
           <p class="content-markdown-list" data-markdown-list>
-            - 복합 프롬프트 문제를 하나의 end-to-end 생성 문제가 아니라 조합 가능한 파이프라인 문제로 재구성했습니다.
+            - 복합 프롬프트 문제를 하나의 end-to-end 생성 문제가 아니라 ==조합 가능한 파이프라인 문제==로 재구성했습니다.
               - 디버깅 포인트와 개선 우선순위를 더 명확히 확인할 수 있게 했습니다.
               - PoC 파이프라인을 구성하는 마일스톤을 독립적인 사내 모션 AI 연구 자산으로 활용할 수 있는 형태로 정리했습니다.
             - 빠른 개념 검증 과정에서 기존 모델을 조합해 시너지를 낼 수 있는 실용적인 경로를 제안했습니다.
-              - 모델 재사용성과 실험 속도를 동시에 높일 수 있는 방향을 제시했습니다.
+              - ==모델 재사용성==과 실험 속도를 동시에 높일 수 있는 방향을 제시했습니다.
           </p>
         </div>
       </div>
