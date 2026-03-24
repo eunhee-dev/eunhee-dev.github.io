@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260324-inline-highlight">
+    <link rel="stylesheet" href="../../showcase.css?v=20260324-mermaid-architecture">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -78,7 +78,7 @@
 
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - As-is : 사용자가 지정한 스타일을 반영하면서도 원래 모션의 맥락을 유지하는 신규 모델이 필요했습니다.
               - 이를 학습하기 위한 신규 데이터셋 정의와 모션 캡처가 필요함
               - 콘텐츠 모션과 스타일 모션이 일대일로 대응하지 않는 ==unpaired scenario==에서도 동작해야 함
@@ -88,23 +88,87 @@
               - STYLE100을 참고한 자체 스타일 모션 데이터셋 확보
               - unpaired style transfer 선행연구를 바탕으로 최적 아키텍처 설계
               - 사용 편의성을 개선한 모션 증강 툴 형태의 사내 데모 배포
-              
-          </p>
+
+          </div>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - PoC : ==Transformer VAE== 기반 motion style transfer를 설계했습니다.
               - AdaIN의 beta term을 입력 가능한 항목으로 받아 스타일 적용 강도를 명시적으로 조절할 수 있게 했습니다.
               - 전체 데이터를 무작위 분할할 경우 스타일 간 train-test-val 균형이 무너지는 문제를 확인하고, stratified sampling을 적용해 학습용 데이터셋을 다시 정의했습니다.
               - 2-stage latent VAE 접근으로 style-invariant content encoder와 style generator를 설계했습니다.
                 - Stage 1 : motion-only VAE 학습
                 - Stage 2 : content encoder와 style generator 동시 학습
+                <details>
+                  <summary>스타일 적용 핵심 아키텍처</summary>
+                  <div class="architecture-diagram">
+                    <div class="mermaid">
+                      flowchart LR
+                      subgraph Stage2["Stage 2: Content Encoder + Style Generator"]
+                        x["Content Motion x"] --> E["Frozen Stage-1 VAE Encoder"]
+                        E --> z["Motion Latent z"]
+    
+                        z --> CE["Content Encoder"]
+                        CE --> zc["Style-invariant Content Latent z_c"]
+    
+                        y["Target Style Label"] --> CLIP["CLIP Text Encoder"]
+                        CLIP --> s["Style Embedding s"]
+    
+                        subgraph SG["Style Generator"]
+                          zc --> SA["Content-aware Attention"]
+                          s --> TA["Style-conditioned Tokens / Attention"]
+                          TA --> F["Latent Fusion Transformer"]
+                          SA --> F
+                        end
+    
+                        F --> zhat["Stylized Latent z_hat"]
+                        zhat --> D["Frozen Stage-1 VAE Decoder"]
+                        D --> xt["Stylized Motion x_hat"]
+                      end
+                    </div>
+                  </div>
+                </details>
                   - content encoder는 motion latent로부터 content latent를 다시 인코딩함
                   - style generator는 content latent와 CLIP style embedding을 입력받아 새로운 latent를 생성함
                 - 원본 모션 재구성을 위한 reconstruction loss와 스타일 스왑 후 원래 latent로 복원시키는 cycle loss를 함께 사용함
             - 고도화 : ==mixed attention== 기반 motion style transfer로 확장했습니다.
+            <div class="architecture-diagram">
+              <div class="mermaid">
+                flowchart LR
+                  content["Content Motion"] --> inversion["DDIM Inversion<br/>+ Cached Decoder States"]
+                  styleChoice["User Style Selection"] --> match["Style Candidate"]
+                  match --> styleMotion["Style Motion Selection"]
+                  styleMotion --> sampling["Mixed-Attention Sampling"]
+                  inversion --> sampling
+                  sampling --> output["Stylized Motion"]
+              </div>
+            </div>
+
+            <details>
+              <summary>Mixed attention 상세 로직</summary>
+              <div class="architecture-diagram">
+                <div class="mermaid">
+                  flowchart TD
+                  X["Current mixed sample at timestep t"] --> D{"Is decoder layer i the first(index=0) layer?"}
+
+                  D -->|"Yes"| N["Use current state only<br/>tgt = current output<br/>memory = current state"]
+
+                  D -->|"No, mid DDIM steps"| L{"Layer idx"}
+
+                  L -->|"layer idx = 1..5"| S1["Style-guided cross attention<br/>tgt = current output<br/>memory = cached style kv_l(t)"]
+
+                  L -->|"layer idx = 6..7"| S2["Content-style mixed attention<br/>tgt = w * cached content q_l(t)<br/>+ (1-w) * current output<br/>memory = cached style kv_l(t)"]
+
+                  N --> T["TransformerDecoderLayer(tgt, memory)"]
+                  S1 --> T
+                  S2 --> T
+
+                  T --> Y["Next decoder layer / next DDIM step"]
+                </div>
+              </div>
+            </details>
               - PoC를 통해 서로 다른 motion feature를 교환하는 방식으로 스타일 변환이 가능함을 확인했습니다.
               - Transformer decoder 기반 pre-trained diffusion model의 prior knowledge를 샘플링 과정에 활용했습니다.
               - 라벨 기반 모델이 아니어서 데이터셋 제약을 덜 받고, 로직상 임의 스타일의 모션으로 확장 가능한 구조를 설계했습니다.
@@ -117,13 +181,14 @@
                 - 예) 콘텐츠 모션과 스타일 모션의 맥락이 걷기와 눕기처럼 크게 다르면 global translation과 velocity 차이로 아티팩트가 발생할 수 있음
               - 실제 사용 시나리오에서는 PoC처럼 라벨 형태로 스타일을 선택하는 ==간단한 입력 구조를 유지==했습니다.
                 - 후보 스타일 모션의 kinematic feature를 미리 계산해 캐싱하고, 입력 모션과 유사한 모션을 선택해 내부적으로 mixed attention sampling 로직을 따르도록 설계했습니다.
-  
-          </p>
+
+          </div>
+
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - 프로젝트에 필요한 모션 캡처 데이터 리서치와 기획을 수행했습니다.
             - PoC, 고도화, 데모 페이지 구축으로 이어지는 ==단계별 마일스톤==을 설계했습니다.
             - 데모 페이지를 통해 결과를 확인하고 선택할 수 있는 사용 경로를 마련했습니다.
@@ -131,10 +196,11 @@
               - 후속 개선 포인트를 확보해 서비스 기획 측면의 의사결정에 기여했습니다.
             - 사용자의 ==입력 구조를 단순화==하고 품질 일관성을 확보하는 방향으로 설계했습니다.
               - 복잡한 입력 구조는 모델 내부에서 처리하고, 사용자는 간단한 입력 형태만 유지하도록 구성했습니다.
-          </p>
+          </div>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260324-inline-highlight"></script>
+    <script type="module" src="../../showcase-mermaid.js?v=20260324-mermaid-architecture"></script>
+    <script src="../../showcase.js?v=20260324-embedded-blocks"></script>
   </body>
 </html>

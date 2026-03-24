@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260324-inline-highlight">
+    <link rel="stylesheet" href="../../showcase.css?v=20260324-mermaid-architecture">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -78,19 +78,31 @@
 
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - As-is : 생성 모델을 활용한 모션 결과물에는 신체가 겹치거나 떨림이 발생하는 등 아티팩트가 존재했습니다.
               - 학습 분포에서 먼 local rotation 정보가 생성되면 몰입을 해치는 결과가 발생할 수 있음
               - 서비스 중인 개별 모션 모델의 아티팩트를 각각 수정하는 방식은 장기적인 유지보수 비용과 복잡도가 큼
             - To-be : 기존 모델과 호환 가능한 ==모듈형 모션 보정 모델==이 필요했습니다.
               - 학습 범위를 local rotation으로 한정한 motion tokenizer 형태의 보정 모델이 필요함
               - 빠른 샘플링과 가벼운 아키텍처를 바탕으로 기존 모델의 후처리 로직에 바로 활용 가능해야 함
-          </p>
+          </div>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="architecture-diagram">
+            <div class="mermaid">
+              flowchart LR
+                input["Generated Motion"] --> encoder["Encoder"]
+                subgraph refiner["1D Conv RQVAE Refiner"]
+                  encoder --> quant["Residual Quantizer"]
+                  quant --> decoder["Decoder"]
+                end
+                decoder --> merge["Merge Original Global Translation"]
+                merge --> output["Refined Motion"]
+            </div>
+          </div>
+          <div class="content-markdown-list" data-markdown-list>
             - ==VQVAE, RQVAE, diffusion== 기반 모션 보정 모델 PoC를 진행해 입력 모션을 자연스러운 분포로 보정하는 접근을 비교했습니다.
               - VAE 계열에서는 1D Convolution 경계 구간의 drift를 완화하기 위해 padding을 적용하고, encoder-decoder를 통과한 뒤 padding 구간을 제거해 반환했습니다.
               - Diffusion 계열에서는 입력 모션에 약한 gaussian noise를 더한 뒤 10 step denoising을 반복해 결과를 반환했습니다.
@@ -102,18 +114,19 @@
               - '얼마나 자연스러운가'를 수치화할 수 있는 대표 지표를 선정해 리포트를 작성하고 의사결정 근거로 제공했습니다.
               - 가벼운 구조와 1-step sampling의 이점을 살릴 수 있는 1D Convolution 기반 RQVAE를 최종 아키텍처로 선택했습니다.
             - ==Triton Ensemble==을 이용해 기존 모델의 후처리 로직을 담당하는 파이프라인을 설계하고 배포했습니다.
-          </p>
+          </div>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - VQVAE 대비 test set에서 복원 모션과 원본 모션 간 MSE를 43.6% 낮췄습니다.
             - 여러 모션 생성 모델에 ==재사용 가능한 아키텍처==와 서빙 로직을 제안해 조직 내 생산성을 높이고 ==유지보수 비용을 줄이는== 데 기여했습니다.
-          </p>
+          </div>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260324-inline-highlight"></script>
+    <script type="module" src="../../showcase-mermaid.js?v=20260324-mermaid-architecture"></script>
+    <script src="../../showcase.js?v=20260324-embedded-blocks"></script>
   </body>
 </html>

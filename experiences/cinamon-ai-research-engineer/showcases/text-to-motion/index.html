@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png?v=20260320-favicon">
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico?v=20260320-favicon">
     <link rel="manifest" href="/site.webmanifest?v=20260320-favicon">
-    <link rel="stylesheet" href="../../showcase.css?v=20260324-inline-highlight">
+    <link rel="stylesheet" href="../../showcase.css?v=20260324-mermaid-architecture">
   </head>
   <body class="showcase-shell">
     <div class="case-study-page">
@@ -75,19 +75,40 @@
 
         <div class="content-block">
           <h2>📍 풀어야 했던 문제</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - As-is : 유사도 기반 검색 모델은 품질이 안정적이고 가벼운 구조로 빠르게 서비스할 수 있었지만, 표현 범위가 확보한 데이터셋에 제한되고 원하는 길이로 생성할 수 없었습니다.
               - 폴리싱이 끝난 모션 캡처 원본을 그대로 활용할 수 있어 결과 품질은 우수함
               - 어노테이션된 구간만 제공할 수 있어 길이 제어와 표현 확장에 한계가 있음
             - To-be : 텍스트 조건을 반영하면서도 ==원하는 길이로 생성== 가능한 모델이 필요했습니다.
               - 검색 기반 방식보다 넓은 표현 범위를 제공해야 하고, 생성 기반 모델의 motion-text align을 향상시켜야 함
               - 샘플링과 모델 최적화를 통해 ==서비스 가능한 추론 속도==를 확보해야 함
-          </p>
+          </div>
         </div>
 
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="architecture-diagram">
+            <div class="mermaid">
+              flowchart LR
+              Client[Client] --> FastAPI[FastAPI API Server]
+
+              Retrieve[Retrieve Service<br/>length lookup]
+              FastAPI -. optional .-> Retrieve
+
+              FastAPI --> Gen
+
+              subgraph Triton[Triton Server]
+                  direction TB
+                  Gen[t2m_generate]
+                  Refiner[motion_refine]
+                  Gen --> Refiner
+              end
+
+              Refiner --> FastPost[FastAPI post-process]
+              FastPost --> Response[API Response]
+            </div>
+          </div>
+          <div class="content-markdown-list" data-markdown-list>
             - Transformer Encoder 기반 denoising network를 적용해 가변 길이 생성에 유연하게 대응했습니다.
             - DDPM 1000 step sampling을 사용할 경우 300 frame 생성에 1분 이상 소요되어, ==DDIM 10 step==으로 줄여 샘플링 효율을 높였습니다. (FBX I/O 제외)
             - 생성 결과물의 아티팩트를 줄이기 위해 ==motion refinement 모델==을 후처리 단계에 적용했습니다.
@@ -99,12 +120,12 @@
               - Triton은 최적화된 추론 로직을 담당합니다.
                 - Dynamic batching을 적용해 ==GPU 자원 활용을 최적화==했습니다.
                 - Ensemble model을 적용해 단일 Triton 서버 호출로 전체 추론 파이프라인을 실행할 수 있도록 구성했습니다.
-          </p>
+          </div>
         </div>
 
         <div class="content-block">
           <h2>📍 기여한 점</h2>
-          <p class="content-markdown-list" data-markdown-list>
+          <div class="content-markdown-list" data-markdown-list>
             - 검색 기반 모델 대비 더 넓은 표현 범위와 ==길이 제어==가 가능한 모션 생성 기능을 구현했습니다.
               - 좌우, 시계/반시계처럼 방향성이 포함된 텍스트와의 정합성을 높였습니다.
               - 사용자가 원하는 길이로 모션을 생성할 수 있는 경로를 확보했습니다.
@@ -112,10 +133,11 @@
               - ==ML lifecycle 전반==을 직접 운영하고 문서화해 팀 내 공유 자산으로 정리했습니다.
               - 병목 구간을 작은 단위로 나누어 진단하고 개선했습니다.
               - 엔지니어링, 클라이언트 등 타 팀과 협업하며 문제를 해결했습니다.
-          </p>
+          </div>
         </div>
       </div>
     </div>
-    <script src="../../showcase.js?v=20260324-inline-highlight"></script>
+    <script type="module" src="../../showcase-mermaid.js?v=20260324-mermaid-architecture"></script>
+    <script src="../../showcase.js?v=20260324-embedded-blocks"></script>
   </body>
 </html>
