@@ -6,6 +6,60 @@
   var fencePattern = /^(`{2,})(.*)$/;
   var inlineCodePattern = /`([^`]+)`/g;
 
+  function appendTextNode(parent, text) {
+    if (!text) {
+      return;
+    }
+
+    parent.appendChild(document.createTextNode(text));
+  }
+
+  function findHighlightRange(text, startIndex) {
+    var highlightStart = text.indexOf('==', startIndex || 0);
+    var highlightEnd;
+
+    while (highlightStart >= 0) {
+      highlightEnd = text.indexOf('==', highlightStart + 2);
+
+      if (highlightEnd < 0) {
+        return null;
+      }
+
+      if (highlightEnd > highlightStart + 2) {
+        return {
+          start: highlightStart,
+          end: highlightEnd
+        };
+      }
+
+      highlightStart = text.indexOf('==', highlightStart + 2);
+    }
+
+    return null;
+  }
+
+  function appendHighlightedText(parent, text) {
+    var cursor = 0;
+    var highlightRange;
+    var mark;
+
+    while (cursor < text.length) {
+      highlightRange = findHighlightRange(text, cursor);
+
+      if (!highlightRange) {
+        appendTextNode(parent, text.slice(cursor));
+        return;
+      }
+
+      appendTextNode(parent, text.slice(cursor, highlightRange.start));
+      mark = document.createElement('mark');
+      mark.className = 'showcase-highlight';
+      mark.textContent = text.slice(highlightRange.start + 2, highlightRange.end);
+      parent.appendChild(mark);
+      cursor = highlightRange.end + 2;
+    }
+  }
+
   function appendInlineContent(parent, text) {
     var fragment =
       typeof document.createDocumentFragment === 'function'
@@ -21,9 +75,7 @@
       var codeNode;
 
       if (match.index > lastIndex) {
-        target.appendChild(
-          document.createTextNode(text.slice(lastIndex, match.index))
-        );
+        appendHighlightedText(target, text.slice(lastIndex, match.index));
       }
 
       codeNode = document.createElement('code');
@@ -33,7 +85,7 @@
     }
 
     if (lastIndex < text.length) {
-      target.appendChild(document.createTextNode(text.slice(lastIndex)));
+      appendHighlightedText(target, text.slice(lastIndex));
     }
 
     if (fragment) {
@@ -99,6 +151,9 @@
     });
     inlineCodePattern.lastIndex = 0;
     var hasInlineCode = inlineCodePattern.test(block.textContent);
+    var hasInlineHighlight = lines.some(function(line) {
+      return Boolean(findHighlightRange(line));
+    });
     var hasMarkdownList = bulletLines.length > 0;
     var baseIndent = hasMarkdownList
       ? bulletLines.reduce(function(minIndent, bulletLine) {
@@ -207,7 +262,7 @@
       codeBlockState = null;
     }
 
-    if (!hasMarkdownList && !hasCodeFence && !hasInlineCode) {
+    if (!hasMarkdownList && !hasCodeFence && !hasInlineCode && !hasInlineHighlight) {
       return;
     }
 

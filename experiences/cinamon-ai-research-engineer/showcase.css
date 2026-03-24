@@ -220,6 +220,22 @@ h3 {
   font-size: 0.92em;
 }
 
+.showcase-highlight {
+  padding: 0 0.16em;
+  color: inherit;
+  border-radius: 0.18em;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0.32em,
+      rgba(255, 229, 92, 0.9) 0.32em,
+      rgba(255, 229, 92, 0.9) calc(100% - 0.08em),
+      transparent calc(100% - 0.08em)
+    );
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 .hero-summary-rich pre,
 .markdown-list-rich pre {
   margin: 0;
