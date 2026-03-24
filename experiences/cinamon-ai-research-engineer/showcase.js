@@ -7,6 +7,37 @@
   var inlineCodePattern = /`([^`]+)`/g;
   var TEXT_NODE = 3;
   var ELEMENT_NODE = 1;
+  var INLINE_TAGS = {
+    A: true,
+    ABBR: true,
+    B: true,
+    BDI: true,
+    BDO: true,
+    CITE: true,
+    CODE: true,
+    DATA: true,
+    DFN: true,
+    EM: true,
+    I: true,
+    KBD: true,
+    LABEL: true,
+    MARK: true,
+    Q: true,
+    RP: true,
+    RT: true,
+    RUBY: true,
+    S: true,
+    SAMP: true,
+    SMALL: true,
+    SPAN: true,
+    STRONG: true,
+    SUB: true,
+    SUP: true,
+    TIME: true,
+    U: true,
+    VAR: true,
+    WBR: true
+  };
 
   function appendTextNode(parent, text) {
     if (!text) {
@@ -133,49 +164,176 @@
     parent.appendChild(pre);
   }
 
-  function getBlockSourceText(block) {
-    var source = '';
+  function isInlineElement(node) {
+    return node.nodeType === ELEMENT_NODE && Boolean(INLINE_TAGS[node.tagName]);
+  }
+
+  function cloneSegments(segments) {
+    return segments.map(function(segment) {
+      if (segment.type === 'text') {
+        return {
+          type: 'text',
+          text: segment.text
+        };
+      }
+
+      return {
+        type: 'node',
+        node: segment.node.cloneNode(true)
+      };
+    });
+  }
+
+  function trimLineSegments(segments) {
+    var trimmed = cloneSegments(segments);
+
+    while (trimmed.length && trimmed[0].type === 'text' && !trimmed[0].text.trim()) {
+      trimmed.shift();
+    }
+
+    while (
+      trimmed.length &&
+      trimmed[trimmed.length - 1].type === 'text' &&
+      !trimmed[trimmed.length - 1].text.trim()
+    ) {
+      trimmed.pop();
+    }
+
+    if (trimmed.length && trimmed[0].type === 'text') {
+      trimmed[0].text = trimmed[0].text.replace(/^\s+/, '');
+    }
+
+    if (trimmed.length && trimmed[trimmed.length - 1].type === 'text') {
+      trimmed[trimmed.length - 1].text = trimmed[trimmed.length - 1].text.replace(/\s+$/, '');
+
+      if (!trimmed[trimmed.length - 1].text.length) {
+        trimmed.pop();
+      }
+    }
+
+    return trimmed.filter(function(segment) {
+      return segment.type !== 'text' || segment.text.length > 0;
+    });
+  }
+
+  function lineSegmentsToText(segments) {
+    return segments
+      .map(function(segment) {
+        if (segment.type === 'text') {
+          return segment.text;
+        }
+
+        return segment.node.textContent || '';
+      })
+      .join('');
+  }
+
+  function appendSegments(parent, segments) {
+    segments.forEach(function(segment) {
+      if (segment.type === 'text') {
+        appendInlineContent(parent, segment.text);
+        return;
+      }
+
+      parent.appendChild(segment.node);
+    });
+  }
+
+  function stripListMarker(segments) {
+    var stripped = cloneSegments(segments);
+
+    if (!stripped.length || stripped[0].type !== 'text') {
+      return trimLineSegments(stripped);
+    }
+
+    stripped[0].text = stripped[0].text.replace(/^(\s*)[-*+]\s+/, '');
+
+    if (!stripped[0].text.length) {
+      stripped.shift();
+    }
+
+    return trimLineSegments(stripped);
+  }
+
+  function lineHasMeaningfulContent(line) {
+    return line.segments.some(function(segment) {
+      return segment.type === 'node' || Boolean(segment.text.trim());
+    });
+  }
+
+  function collectContentItems(block) {
+    var items = [
+      {
+        type: 'line',
+        segments: []
+      }
+    ];
+    var currentLine = items[0];
+
+    function startNewLine() {
+      currentLine = {
+        type: 'line',
+        segments: []
+      };
+      items.push(currentLine);
+    }
 
     Array.prototype.slice.call(block.childNodes).forEach(function(node) {
       if (node.nodeType === TEXT_NODE) {
-        source += node.textContent;
+        node.textContent.split(/\r?\n/).forEach(function(part, index, parts) {
+          if (part.length) {
+            currentLine.segments.push({
+              type: 'text',
+              text: part
+            });
+          }
+
+          if (index < parts.length - 1) {
+            startNewLine();
+          }
+        });
         return;
       }
 
       if (node.nodeType === ELEMENT_NODE && node.tagName === 'BR') {
-        source += '\n';
+        startNewLine();
+        return;
+      }
+
+      if (isInlineElement(node)) {
+        currentLine.segments.push({
+          type: 'node',
+          node: node.cloneNode(true)
+        });
+        return;
+      }
+
+      if (node.nodeType === ELEMENT_NODE) {
+        if (!lineHasMeaningfulContent(currentLine)) {
+          items.pop();
+        }
+
+        items.push({
+          type: 'block',
+          node: node.cloneNode(true)
+        });
+        startNewLine();
       }
     });
 
-    return source;
-  }
-
-  function hasFollowingEmbeddedSibling(node) {
-    var sibling = node.nextSibling;
-
-    while (sibling) {
-      if (sibling.nodeType === TEXT_NODE) {
-        if (sibling.textContent.trim()) {
-          return false;
-        }
-
-        sibling = sibling.nextSibling;
-        continue;
-      }
-
-      if (sibling.nodeType === ELEMENT_NODE && sibling.tagName === 'BR') {
-        return false;
-      }
-
-      return sibling.nodeType === ELEMENT_NODE;
-    }
-
-    return false;
+    return items;
   }
 
   markdownListBlocks.forEach(function(block) {
-    var sourceText = getBlockSourceText(block);
-    var lines = sourceText.split(/\r?\n/);
+    var contentItems = collectContentItems(block);
+    var lines = contentItems
+      .filter(function(item) {
+        return item.type === 'line';
+      })
+      .map(function(item) {
+        return lineSegmentsToText(item.segments);
+      });
+    var sourceText = lines.join('\n');
     var bulletLines = lines
       .map(function(line) {
         var match = line.match(/^(\s*)[-*+]\s+(.*)$/);
@@ -197,8 +355,8 @@
     var hasInlineHighlight = lines.some(function(line) {
       return Boolean(findHighlightRange(line));
     });
-    var hasEmbeddedBlocks = Array.prototype.slice.call(block.children).some(function(node) {
-      return node.tagName !== 'BR';
+    var hasEmbeddedBlocks = contentItems.some(function(item) {
+      return item.type === 'block';
     });
     var hasMarkdownList = bulletLines.length > 0;
     var baseIndent = hasMarkdownList
@@ -220,7 +378,13 @@
       }
 
       paragraph = document.createElement('p');
-      appendInlineContent(paragraph, paragraphLines.join(' '));
+      paragraphLines.forEach(function(lineSegments, index) {
+        if (index > 0) {
+          appendTextNode(paragraph, ' ');
+        }
+
+        appendSegments(paragraph, lineSegments);
+      });
       replacement.appendChild(paragraph);
       paragraphLines = [];
     }
@@ -246,6 +410,14 @@
       currentEntry = listStack[listStack.length - 1];
 
       return currentEntry.lastItem || replacement;
+    }
+
+    function getCurrentListItem() {
+      if (!listStack.length) {
+        return null;
+      }
+
+      return listStack[listStack.length - 1].lastItem;
     }
 
     function getListEntry(relativeIndent) {
@@ -309,10 +481,13 @@
       codeBlockState = null;
     }
 
-    function processLine(line) {
+    function processLine(lineSegments) {
+      var line = lineSegmentsToText(lineSegments);
       var lineMatch = line.match(/^(\s*)[-*+]\s+(.*)$/);
       var fenceMatch = line.trim().match(fencePattern);
       var trimmedLine = line.trim();
+      var trimmedSegments = trimLineSegments(lineSegments);
+      var currentListItem;
       var listEntry;
       var listItem;
       var relativeIndent;
@@ -360,14 +535,22 @@
         listEntry = getListEntry(relativeIndent);
 
         listItem = document.createElement('li');
-        appendInlineContent(listItem, lineMatch[2].trim());
+        appendSegments(listItem, stripListMarker(lineSegments));
         listEntry.list.appendChild(listItem);
         listEntry.lastItem = listItem;
         return;
       }
 
+      currentListItem = getCurrentListItem();
+
+      if (currentListItem) {
+        appendTextNode(currentListItem, ' ');
+        appendSegments(currentListItem, trimmedSegments);
+        return;
+      }
+
       resetListState();
-      paragraphLines.push(trimmedLine);
+      paragraphLines.push(trimmedSegments);
     }
 
     if (!hasMarkdownList && !hasCodeFence && !hasInlineCode && !hasInlineHighlight && !hasEmbeddedBlocks) {
@@ -382,36 +565,17 @@
       replacement.classList.add('hero-summary-rich');
     }
 
-    if (hasEmbeddedBlocks) {
-      Array.prototype.slice.call(block.childNodes).forEach(function(node) {
-        if (node.nodeType === TEXT_NODE) {
-          var textLines = node.textContent.split(/\r?\n/);
+    contentItems.forEach(function(item) {
+      if (item.type === 'block') {
+        flushCodeBlock();
+        flushParagraph();
+        getCurrentContainer().appendChild(item.node);
+        preserveListContext = Boolean(listStack.length);
+        return;
+      }
 
-          if (hasFollowingEmbeddedSibling(node)) {
-            while (textLines.length && !textLines[textLines.length - 1].trim()) {
-              textLines.pop();
-            }
-          }
-
-          textLines.forEach(processLine);
-          return;
-        }
-
-        if (node.nodeType === ELEMENT_NODE && node.tagName === 'BR') {
-          processLine('');
-          return;
-        }
-
-        if (node.nodeType === ELEMENT_NODE) {
-          flushCodeBlock();
-          flushParagraph();
-          getCurrentContainer().appendChild(node.cloneNode(true));
-          preserveListContext = Boolean(listStack.length);
-        }
-      });
-    } else {
-      lines.forEach(processLine);
-    }
+      processLine(item.segments);
+    });
 
     flushCodeBlock();
     flushParagraph();
