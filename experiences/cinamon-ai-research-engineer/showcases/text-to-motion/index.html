@@ -109,14 +109,14 @@
             </div>
           </div>
           <div class="content-markdown-list" data-markdown-list>
-            - 생성 결과물의 foot skating, penetration을 개선하기 위해 generation → refinement 2단계 로직을 설계했습니다.
-              - 이전 프로젝트의 결과물인 <a href="../motion-refinement/index.html">motion refinement model</a>을 이용해 개별 모델의 재사용성을 높였습니다. 
-            - 텍스트 정합성을 고려한 mirror augmentation으로 모션-텍스트 데이터 쌍을 증강하고 학습에 활용했습니다. (모션 데이터 ==2배==, 텍스트 어노테이션 데이터 ==30% 증가==)
-            - DDPM 1000 step → DDIM 10 step으로 샘플링을 간소화해 추론 시간을 단축했습니다.  
-            - ==Triton과 FastAPI==를 결합한 서빙 구조를 채택해 추론 최적화와 서비스 I/O를 분리했습니다.
+            - 생성 모델은 데이터셋에 없는 모션을 생성할 수 있었지만 penetration을 비롯한 ==아티팩트가 발생==해 시각적 품질을 떨어뜨렸고, ==느린 추론 속도==로 인해 서비스 적용이 어려웠습니다.
+              - Collision을 탐지하는 작업은 계산 비용이 컸기 때문에, 모션 분포를 학습한 보정 모델을 이용한 =='생성 → 보정' 2단계 파이프라인을 설계==했습니다.
+              - ONNX 기반 최적화 후 언리얼 엔진에 직접 탑재하는 대신, 장기적인 유지보수와 확장성을 고려해 ==API 형태 서빙== 구조를 선택했습니다.
+            - 이전 프로젝트의 결과물인 <a href="../motion-refinement/index.html">motion refinement model</a>을 적용해 ==모델 재사용성==을 높였습니다. 
+            - 텍스트 정합성을 유지한 mirror augmentation으로 데이터 부족 문제를 보완했고, 모션 데이터는 ==2배==, 텍스트 어노테이션은 ==30%== 확장했습니다.
+            - ==Triton과 FastAPI==를 결합한 서빙 구조를 채택해 추론 최적화(Triton)와 서비스 I/O(FastAPI)를 분리했습니다.
               - Dynamic batching을 적용해 ==GPU 자원 활용을 최적화==했습니다.
-              - Ensemble model을 적용해 단일 Triton 서버 호출로 2단계 추론 파이프라인을 단순화했습니다.
-            - 사내 모션 모델 데모 페이지에 API를 연동해 프로젝트 결과를 사용 가능한 형태로 조직 구성원에게 공유했습니다.  
+              - Triton Ensemble을 적용해 단일 Triton 서버 호출로 2단계 ==추론 파이프라인을 단순화==했습니다. 
           </div>
         </div>
 
