@@ -28,8 +28,8 @@
         <p class="hero-meta">프로젝트 기간: 2025. 06 - 2025. 11</p>
         <p class="hero-summary">
           임의의 시작 포즈와 종료 포즈 사이를 자연스럽게 연결하는 ==motion in-betweening 모델==을 고도화했습니다.
-          baseline의 failure case를 체계적으로 재현하고 분류한 뒤, ==diffusion noise optimization(DNO)==을 적용해 짧은 거리와 유사 endpoint 조건에서 발생하던 ==drifting 문제==를 완화했습니다.
-          모델 서빙과 데모 페이지까지 연결해 결과를 바로 검증할 수 있는 형태로 배포했습니다.
+          Baseline model의 failure scenario 를 재현하고 문서화해 개선 우선순위를 파악했고, ==Diffusion noise optimization(DNO)==을 적용해 ==drifting 문제==를 완화했습니다.
+          TorchServe를 이용해 모델을 서빙했으며, API를 데모 페이지에 연동해 사용할 수 있는 형태로 배포했습니다.
         </p>
         <div class="chip-row" aria-label="In-betweening metadata">
           <span class="chip">P2P</span>
@@ -57,7 +57,7 @@
               <div
                 class="media-slide media-slide-tone-02"
                 data-media-slide
-                data-media-description="짧은 거리 조건에서 발생하는 failure 사례를 보여주는 샘플로, 시작/종료 포즈가 가까운 경우 drifting이 발생합니다."
+                data-media-description="짧은 거리 조건에서 발생하는 failure 사례를 보여주는 샘플로, 가까운 두 모션을 이을 경우 drifting이 발생합니다."
                 hidden
               >
                 <video autoplay muted loop controls playsinline preload="metadata" aria-label="In-betweening short-distance failure demo video">
@@ -88,19 +88,6 @@
         </div>
 
         <div class="content-block">
-          <h2>📍 풀어야 했던 문제</h2>    
-          <div class="content-markdown-list" data-markdown-list>
-            - As-is : baseline 모델은 짧은 거리 이동이나 intro/outro가 유사한 경우 아티팩트를 만들었습니다.
-              - 짧은 거리에서는 drifting 후 이동하는 부자연스러운 전환 모션이 생성됨
-              - 모션의 역동성에 비해 연결 시간이 길면 부자연스러운 전환 결과가 생성됨
-            - To-be : 더 자연스러운 전환 모션을 생성하는 motion in-betweening 모델이 필요했습니다.
-              - 짧은 거리 이동이나 긴 연결 시간에서도 ==자연스러운 전환 모션==을 생성해야 함
-              - 임의의 intro/outro 모션에도 ==안정적으로 대응==해야 함
-              - 기존 baseline 수준의 latency를 최대한 유지하면서도 품질을 개선할 수 있어야 함
-          </div>
-        </div>
-
-        <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <div class="content-markdown-list" data-markdown-list>
             <div class="architecture-diagram">
@@ -114,30 +101,17 @@
                   dno --> motion["In-between Motion"]
               </div>
             </div>
-            - baseline의 failure case를 확보하고 분석 리포트를 작성해 개선 우선순위를 정리했습니다.
-              - 거리, 길이, endpoint 유사도, 속도 변화를 기준으로 실패 케이스를 분류했습니다.
-              - short move, long move, similar endpoint 조건에서 전환 모션의 차이를 비교했습니다.
-              - 작성한 리포트를 바탕으로 고도화 모델에서 개선이 필요한 문제를 구체적으로 정의했습니다.
-            - diffusion noise optimization 기반 접근으로 품질을 개선했습니다.
-              - ==pretrained diffusion prior==를 활용해 샘플링 시 ==최적화 기법==을 적용했습니다.
-              - intro/outro motion을 제약으로 두고, 나머지 시퀀스는 랜덤 노이즈에서 시작하도록 구성했습니다.
+            - Diffusion model의 ==노이즈를 최적화==하는 방식으로 in-betweening 품질을 개선했습니다.
               - 지정한 횟수만큼 denoising을 반복하며 원본 intro/outro 정보와의 MSE loss를 줄이는 방향으로 초기 노이즈를 업데이트했습니다.
-              - 다양한 이동 시나리오에서도 더 자연스러운 전환 모션을 생성했습니다. (Media 3)
-            - ==TorchServe== 기반 모델 서빙과 데모 페이지, 쇼케이스를 제작했습니다.
-              - 인퍼런스 시 성능과 속도 간 trade-off를 고려해 optimize step 400을 적용했고, 샘플 1개당 약 30초가 소요됐습니다.
-              - 이후 후속 프로젝트에는 ==Triton과 FastAPI== 기반 서빙 로직을 적용했습니다.
+              - Diffusion model의 prior를 이용하기 때문에 ==자연스러운 모션==을 생성할 수 있습니다.
+            - 다양한 이동 시나리오에서도 intro/outro 모션을 보존하며 자연스러운 전환 모션을 생성했습니다. (Media 3)
+              - 단거리 이동이 필요할 때 '이동하지 않는 방향으로' in-betweening 모션이 최적화되는 현상을 방지하기 위해 ==충분한 최적화 step==을 제공했습니다.
+              - 성능과 속도 간 trade-off를 고려해 optimize step 400을 적용했고, 샘플 1개당 ==약 30초==가 소요됐습니다.
+            - ==TorchServe== 를 기반으로 모델을 서빙했고, 데모 페이지를 통해 모델을 배포했습니다.
+              - Backpropagation 연산이 포함된 모델을 효과적으로 배포하기 위해 ONNX → TorchServe 로 배포 방법을 변경했습니다.
           </div>
         </div>
 
-        <div class="content-block">
-          <h2>📍 기여한 점</h2>
-          <div class="content-markdown-list" data-markdown-list>
-            - 최적화 기반 motion in-betweening 샘플링 로직을 적용해 기존 baseline의 ==failure case를 완화==했습니다.
-              - pretrained diffusion model의 prior knowledge를 활용해 유지보수 비용을 낮췄습니다.
-              - baseline과 비교 가능한 성능 리포트를 작성해 ==의사결정을 위한 근거 자료==를 제공했습니다.
-            - failure case 개선 결과를 쇼케이스로 정리하고, API 호출 기반 모델 추론 데모까지 제공했습니다.
-          </div>
-        </div>
       </div>
     </div>
     <script type="module" src="../../showcase-mermaid.js?v=20260324-mermaid-architecture"></script>
