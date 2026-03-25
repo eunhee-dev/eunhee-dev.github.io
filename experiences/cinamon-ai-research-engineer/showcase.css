@@ -190,6 +190,61 @@ h3 {
   margin-top: 12px;
 }
 
+.hero-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.hero-main-group {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hero-main-group h1 {
+  min-width: 0;
+}
+
+.hero-main-group .hero-meta {
+  margin-top: 12px;
+}
+
+.hero-side-group {
+  flex: 0 1 340px;
+  min-width: 250px;
+  max-width: 360px;
+  padding-top: 4px;
+}
+
+.hero-side-label {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meta-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  padding: 5px 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: rgba(251, 251, 248, 0.72);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
 .hero-summary {
   max-width: 840px;
   margin-top: 16px;
@@ -697,6 +752,18 @@ h3 {
 
   h1 {
     font-size: 28px;
+  }
+
+  .hero-heading-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .hero-side-group {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    padding-top: 0;
   }
 
   .showcase-grid {
