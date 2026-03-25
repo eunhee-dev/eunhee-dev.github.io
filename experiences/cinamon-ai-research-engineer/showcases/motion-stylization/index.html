@@ -87,9 +87,11 @@
         <div class="content-block">
           <h2>📍 업무 수행 내용</h2>
           <div class="content-markdown-list" data-markdown-list>
-            - '스타일이 잘 적용됨'을 명시적인 loss function으로 정의하는 대신 prior knowledge와 Attention 연산을 활용한 스타일 적용 방법을 제안했습니다.
-            - PoC : ==Transformer VAE== 기반 motion style transfer 아키텍쳐를 설계했습니다.
-              - 2-stage latent VAE 접근으로 style-invariant content encoder와 style generator를 설계했습니다.
+            - AI 기반 모션 콘텐츠 ==기능 기획 의사결정 근거==를 만들기 위해, 스타일 변환 기능의 구현 가능성과 내부 사용자 경험을 검증하는 프로젝트를 진행했습니다.
+            - =='스타일이 잘 적용됨'을 어떻게 수치적으로 정의할 것인지==가 이 프로젝트의 핵심 과제였습니다.
+              - 모션에서 스타일 정보를 추출하는 encoder를 정의하는 것은 대규모 paired dataset이 없어 일반화를 보장할 수 없었습니다.
+              - 따라서, 이를 명시적인 loss function으로 정의하는 대신 pretrained model의 prior knowledge와 Attention 연산을 활용한 스타일 적용 방법을 제안했습니다.
+            - PoC : ==2-stage latent VAE== 모델로 motion content encoder와 style generator를 설계했습니다.
                 - Stage 1 : motion-only VAE 학습
                 - Stage 2 : content encoder와 style generator 동시 학습
                 <details>
@@ -133,8 +135,8 @@
                   sampling --> output["Stylized Motion"]
               </div>
             </div>
-              - Encoder와 generator를 동시 학습 목표로 삼는 경우 학습 안정성이 떨어지는 문제가 발생했습니다.
-              - Transformer decoder 기반 pre-trained diffusion model의 prior knowledge를 이용해 샘플링 과정에서 스타일을 적용하는 전략을 제안했습니다.
+              - Prior knowledge를 이용하더라도, PoC처럼 encoder와 generator를 동시에 학습하는 경우 ==학습 안정성==이 떨어졌습니다. 
+                - Diffusion model의 prior knowledge를 이용하되, ==샘플링 과정==에서 스타일을 적용하는 전략을 제안했습니다.
               - Attention 연산을 변형해 콘텐츠 모션과 스타일 모션의 정보를 명시적으로 교환하는 ==Mixed Attention== 을 구현했습니다. 
               <details>
                 <summary>Mixed attention 상세 로직</summary>
@@ -159,11 +161,11 @@
                   </div>
                 </div>
               </details>
-            - 유저 친화적인 입력/출력 구조를 설계하고 모션 증강 툴 데모 페이지를 제작했습니다.
-              - 사용자가 입력한 모션 따라 결과에 따라 추론 품질 달라질 수 있는 edge case를 발견했습니다.
+            - ==유저 친화적인 입력/출력 구조==를 설계해 모델 사용 접근성을 높였습니다.
+              - 사용자가 입력한 모션에 따라 추론 품질이 달라질 수 있는 edge case를 발견했습니다.
                 - 예) 콘텐츠 모션과 스타일 모션의 걷기와 눕기처럼 크게 다르면 global translation과 velocity 차이로 아티팩트가 발생할 수 있음
-              - 라벨 형태로 스타일을 선택하는 ==간단한 입력 구조를 유지==해 사용자 편의성을 높였습니다.
-                - 스타일 모션의 kinematic feature를 미리 캐싱하고, 입력 모션과 유사도 높은 스타일 모션을 선택해 사용합니다. 
+              - 라벨 형태로 스타일을 선택하는 간단한 입력 구조를 유지해 사용자 편의성을 높였습니다.
+                - 모델 내부적으로는 스타일 모션의 kinematic feature를 캐싱하고, 요청이 들어오면 입력 모션과 유사도 높은 스타일 모션을 선택해 사용합니다. 
           </div>
 
         </div>
