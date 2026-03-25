@@ -43,7 +43,7 @@
         </div>
         <p class="hero-summary">
           임의의 시작 포즈와 종료 포즈 사이를 자연스럽게 연결하는 ==motion in-betweening 모델==을 고도화했습니다.
-          Baseline model의 failure scenario 를 재현하고 문서화해 개선 우선순위를 파악했고, ==Diffusion noise optimization(DNO)==을 적용해 ==drifting 문제==를 완화했습니다.
+          Baseline model의 failure scenario 를 재현하고 문서화해 개선 우선순위를 파악했고, ==Diffusion noise optimization(DNO)==을 적용해 특정 케이스에서 발생하는 ==drifting 문제==를 완화했습니다.
           TorchServe를 이용해 모델을 서빙했으며, API를 데모 페이지에 연동해 사용할 수 있는 형태로 배포했습니다.
         </p>
       </div>
@@ -111,14 +111,14 @@
                   dno --> motion["In-between Motion"]
               </div>
             </div>
-            - Diffusion model의 ==노이즈를 최적화==하는 방식으로 in-betweening 품질을 개선했습니다.
+            - Regression 기반 기존 모델은 짧은 거리 이동을 비롯한 특정 조건에서 품질이 무너지는 failure case가 반복적으로 발생했습니다. (Media 2)
+            - Pretrained diffusion model의 샘플링 과정에서 ==노이즈를 최적화==하는 방식으로 in-betweening 품질을 개선했습니다.
               - 지정한 횟수만큼 denoising을 반복하며 원본 intro/outro 정보와의 MSE loss를 줄이는 방향으로 초기 노이즈를 업데이트했습니다.
-              - Diffusion model의 prior를 이용하기 때문에 ==자연스러운 모션==을 생성할 수 있습니다.
+              - Diffusion prior를 활용해 기존 regression baseline보다 ==자연스러운 전환 모션==을 생성할 수 있었습니다.
             - 다양한 이동 시나리오에서도 intro/outro 모션을 보존하며 자연스러운 전환 모션을 생성했습니다. (Media 3)
-              - 단거리 이동이 필요할 때 '이동하지 않는 방향으로' in-betweening 모션이 최적화되는 현상을 방지하기 위해 ==충분한 최적화 step==을 제공했습니다.
+              - 단거리 이동이 필요할 때 '이동하지 않는 방향으로' in-betweening 모션이 최적화되는 경우가 발생했으며, 방지하기 위해 ==충분한 최적화 step==을 제공했습니다.
               - 성능과 속도 간 trade-off를 고려해 optimize step 400을 적용했고, 샘플 1개당 ==약 30초==가 소요됐습니다.
-            - ==TorchServe== 를 기반으로 모델을 서빙했고, 데모 페이지를 통해 모델을 배포했습니다.
-              - Backpropagation 연산이 포함된 모델을 효과적으로 배포하기 위해 ONNX → TorchServe 로 배포 방법을 변경했습니다.
+            - Backpropagation 연산이 포함되어 ONNX 추론 그래프로 변환하기 어려웠기 때문에, 배포 전략을 TorchServe 기반 ==API 서빙==으로 전환했습니다.
           </div>
         </div>
 
