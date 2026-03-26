@@ -133,6 +133,10 @@ a:focus-visible {
   padding: 28px 20px 56px;
 }
 
+.showcase-page {
+  max-width: 1180px;
+}
+
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
@@ -215,6 +219,11 @@ h3 {
   min-width: 250px;
   max-width: 360px;
   padding-top: 4px;
+}
+
+.role-hero .hero-side-group {
+  flex-basis: 480px;
+  max-width: 500px;
 }
 
 .hero-side-label {
